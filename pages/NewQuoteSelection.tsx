@@ -16,7 +16,7 @@ const NewQuoteSelection: React.FC = () => {
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
         <h2 className="text-lg font-bold flex-1 text-center">Novo Orçamento</h2>
-        <button onClick={() => navigate('/')} className="text-sm font-medium text-slate-400">Cancelar</button>
+        <button onClick={() => navigate('/dashboard')} className="text-sm font-medium text-slate-400">Cancelar</button>
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pb-24">

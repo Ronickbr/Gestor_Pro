@@ -25,10 +25,10 @@ export const Sidebar: React.FC = () => {
     };
 
     // Don't show nav on these pages
-    if (['/login', '/subscription', '/landing', '/terms', '/privacy', '/contact'].includes(location.pathname) || location.pathname.startsWith('/v/')) return null;
+    if (['/', '/login', '/subscription', '/landing', '/terms', '/privacy', '/contact'].includes(location.pathname) || location.pathname.startsWith('/v/')) return null;
 
     const tabs = [
-        { path: '/', label: 'Início', icon: 'dashboard' },
+        { path: '/dashboard', label: 'Início', icon: 'dashboard' },
         { path: '/quotes', label: 'Orçamentos', icon: 'request_quote' },
         { path: '/clients', label: 'Clientes', icon: 'group' },
         { path: '/contract-templates', label: 'Modelos de Contrato', icon: 'description' },

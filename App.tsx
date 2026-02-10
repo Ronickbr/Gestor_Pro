@@ -30,7 +30,7 @@ const BottomNav = () => {
   const navigate = useNavigate();
 
   const tabs = [
-    { path: '/', label: 'Início', icon: 'home' },
+    { path: '/dashboard', label: 'Início', icon: 'home' },
     { path: '/quotes', label: 'Orçamentos', icon: 'request_quote' },
     { path: '/plus', label: '', icon: 'add', isFab: true },
     { path: '/clients', label: 'Clientes', icon: 'group' },
@@ -38,7 +38,7 @@ const BottomNav = () => {
   ];
 
   // Don't show nav on login page
-  if (['/login', '/subscription', '/landing', '/terms', '/privacy', '/contact'].includes(location.pathname) || location.pathname.startsWith('/v/')) return null;
+  if (['/', '/login', '/subscription', '/landing', '/terms', '/privacy', '/contact'].includes(location.pathname) || location.pathname.startsWith('/v/')) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 z-50 w-full bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-white/5 pb-6 pt-2 px-6 shadow-lg no-print md:hidden">
@@ -122,7 +122,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const hiddenRoutes = ['/login', '/subscription', '/landing', '/v/', '/terms', '/privacy', '/contact'];
-  const isFullWidth = hiddenRoutes.some(route => location.pathname.startsWith(route));
+  const isFullWidth = location.pathname === '/' || hiddenRoutes.some(route => location.pathname.startsWith(route));
 
   return (
     <div className="flex min-h-screen bg-background-light dark:bg-background-dark">
@@ -147,7 +147,8 @@ const App: React.FC = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/v/:token" element={<PublicQuoteView />} />
-            <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/quotes" element={<PrivateRoute><QuotesList /></PrivateRoute>} />
             <Route path="/clients" element={<PrivateRoute><ClientsList /></PrivateRoute>} />
             <Route path="/new-client" element={<PrivateRoute><NewClient /></PrivateRoute>} />

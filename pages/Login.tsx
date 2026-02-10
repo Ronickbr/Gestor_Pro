@@ -60,7 +60,7 @@ const Login: React.FC = () => {
 
                 if (data.session) {
                     localStorage.setItem('gestor_pro_auth', 'true');
-                    navigate('/');
+                    navigate('/dashboard');
                 }
             }
         } catch (error: any) {
