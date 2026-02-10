@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@config "./tailwind.config.js";
+
+@layer base {
+  :root {
+    --primary: 19 127 236; /* #137fec */
+    --background-light: 246 247 248; /* #f6f7f8 */
+    --background-dark: 16 25 34; /* #101922 */
+    --surface-dark: 28 37 46; /* #1c252e */
+  }
+
+  body {
+    @apply font-sans text-slate-900 dark:text-slate-100 bg-background-light dark:bg-background-dark antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Improve scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-600;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@layer utilities {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .material-symbols-outlined.filled {
+    font-variation-settings: 'FILL' 1;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print, nav, footer, button, .material-symbols-outlined:not(.printable-icon) {
+    display: none !important;
+  }
+  body, .dark {
+    background: white !important;
+    color: black !important;
+  }
+  .bg-white, .bg-surface-dark, .dark\:bg-surface-dark {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #eee !important;
+  }
+  .text-primary {
+    color: #137fec !important;
+  }
+  main {
+    padding-bottom: 0 !important;
+  }
+}

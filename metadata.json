@@ -1,0 +1,7 @@
+{
+  "name": "Gestor de Serviços Pro",
+  "description": "Uma aplicação completa para técnicos gerenciarem orçamentos, contratos e assinaturas digitais com integração de IA para geração de cláusulas.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
