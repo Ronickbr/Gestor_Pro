@@ -40,6 +40,7 @@ const Login: React.FC = () => {
                     email,
                     password,
                     options: {
+                        emailRedirectTo: window.location.origin,
                         data: {
                             company_name: companyName || 'Minha Empresa'
                         }
