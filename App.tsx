@@ -20,6 +20,7 @@ import LandingPage from './pages/LandingPage';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Contact from './pages/Contact';
+import UpdatePassword from './pages/UpdatePassword';
 import { supabase } from './lib/supabase';
 import { Sidebar } from './components/Sidebar';
 import { Toaster } from 'react-hot-toast';
@@ -131,7 +132,19 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const hiddenRoutes = ['/login', '/subscription', '/landing', '/v/', '/terms', '/privacy', '/contact'];
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        navigate('/update-password');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const hiddenRoutes = ['/login', '/subscription', '/landing', '/v/', '/terms', '/privacy', '/contact', '/update-password'];
   const isFullWidth = location.pathname === '/' || hiddenRoutes.some(route => location.pathname.startsWith(route));
 
   return (
@@ -157,6 +170,7 @@ const App: React.FC = () => {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/v/:token" element={<PublicQuoteView />} />
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
