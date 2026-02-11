@@ -116,9 +116,9 @@ WHERE id NOT IN (SELECT id FROM public.profiles);
 
 -- Adicionar colunas na tabela profiles
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subscription_status text DEFAULT 'trial';
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS trial_ends_at timestamp with time zone DEFAULT (now() + interval '2 months');
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS trial_ends_at timestamp with time zone DEFAULT (now() + interval '30 days');
 
--- Atualizar Trigger para novos usuários (2 meses de trial)
+-- Atualizar Trigger para novos usuários (30 dias de trial)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
@@ -129,7 +129,7 @@ BEGIN
     COALESCE(new.raw_user_meta_data->>'company_name', 'Minha Empresa'), 
     'Gestor',
     'trial',
-    (now() + interval '60 days')
+    (now() + interval '30 days')
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN new;
@@ -142,11 +142,11 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
--- Atualizar usuários existentes (dar 2 meses de trial a partir de hoje)
+-- Atualizar usuários existentes (dar 1 mes de trial a partir de hoje)
 UPDATE public.profiles 
 SET 
   subscription_status = 'trial', 
-  trial_ends_at = (now() + interval '60 days') 
+  trial_ends_at = (now() + interval '30 days') 
 WHERE subscription_status IS NULL;
 
 -- 6. Atualizar Tabela de Clientes (Clients) - Correção de Erro de Schema

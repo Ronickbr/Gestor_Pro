@@ -368,9 +368,20 @@ const Settings: React.FC = () => {
             <SettingsItem
               icon="auto_awesome"
               label="Assistente de Contratos"
-              sub={apiKey ? 'Chave de API Configurada' : 'Configurar geração automática'}
-              color="text-purple-600"
-              onClick={() => setIsApiModalOpen(true)}
+              sub={
+                profile.subscriptionStatus === 'active'
+                  ? (apiKey ? 'Chave de API Configurada' : 'Configurar geração automática')
+                  : 'Disponível apenas para assinantes'
+              }
+              color={profile.subscriptionStatus === 'active' ? "text-purple-600" : "text-slate-400"}
+              onClick={() => {
+                if (profile.subscriptionStatus === 'active') {
+                  setIsApiModalOpen(true);
+                } else {
+                  toast.error('Configure sua assinatura para acessar recursos de IA.');
+                  navigate('/subscription');
+                }
+              }}
             />
           </SettingsSection>
 
