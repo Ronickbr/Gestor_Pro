@@ -53,7 +53,8 @@ const NewClient: React.FC = () => {
           email: formData.email,
           phone: formData.phone,
           address: formData.address,
-          // document, avatar etc are still local-only in DB schema for now mostly
+          document: formData.document,
+          // avatar etc are still local-only in DB schema for now mostly
           // but let's assume we pass them if we update schema later
         } as any);
         toast.success('Cliente criado com sucesso!');

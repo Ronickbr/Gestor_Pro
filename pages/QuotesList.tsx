@@ -130,7 +130,12 @@ const QuotesList: React.FC = () => {
                     </div>
                     <p className="text-xs text-slate-500">#{quote.number} • {quote.services?.[0]?.name || 'Serviço'}</p>
                     <div className="mt-3 flex justify-between items-end">
-                      <span className="text-[10px] text-slate-400">{quote.date}</span>
+                      <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                        {quote.date}
+                        {quote.viewedAt && (
+                            <span className="material-symbols-outlined text-[14px] text-emerald-500" title={`Visualizado em ${new Date(quote.viewedAt).toLocaleDateString('pt-BR')}`}>visibility</span>
+                        )}
+                      </span>
                       <span className="font-black text-slate-900 dark:text-white">
                         R$ {((quote.services?.reduce((a, b) => a + b.price, 0) || 0) + (quote.materials?.reduce((a, b) => a + b.totalPrice, 0) || 0)).toLocaleString('pt-BR')}
                       </span>

@@ -85,15 +85,15 @@ const QuoteSummary: React.FC = () => {
   const handleWhatsApp = () => {
     const docType = quote.status === QuoteStatus.SENT ? 'orçamento' : 'contrato';
     const docNum = quote.contractNumber || quote.number;
-    const link = quote.public_token ? `${window.location.origin}/#/v/${quote.public_token}` : '';
+    const link = quote.publicToken ? `${window.location.origin}/#/v/${quote.publicToken}` : '';
     const passwordText = quote.accessPassword ? `\n🔒 Senha de acesso: *${quote.accessPassword}*` : '';
     const message = `Olá ${quote.client?.name || 'Cliente'}, segue o ${docType} ${docNum} para os serviços de ${quote.services?.[0]?.name || 'instalação'}. Total: R$ ${total.toLocaleString('pt-BR')}. ${link ? `Acesse: ${link}` : ''}${passwordText}`;
     window.open(`https://wa.me/${(quote.client?.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(message)}`);
   };
 
   const handleCopyLink = () => {
-    if (quote.public_token) {
-      const url = `${window.location.origin}/#/v/${quote.public_token}`;
+    if (quote.publicToken) {
+      const url = `${window.location.origin}/#/v/${quote.publicToken}`;
       navigator.clipboard.writeText(url);
       toast.success('Link copiado!');
     } else {
@@ -133,7 +133,14 @@ const QuoteSummary: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => window.open(`#/v/${quote.public_token}`, '_blank')}
+              onClick={handleWhatsApp}
+              className="material-symbols-outlined text-green-500 hover:bg-green-50 dark:hover:bg-green-500/10 p-2 rounded-full transition-colors"
+              title="Enviar via WhatsApp"
+            >
+              chat
+            </button>
+            <button
+              onClick={() => window.open(`#/v/${quote.publicToken}`, '_blank')}
               className="material-symbols-outlined text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 p-2 rounded-full transition-colors"
               title="Visualizar como Cliente"
             >
@@ -166,6 +173,12 @@ const QuoteSummary: React.FC = () => {
               <p className="text-xs text-slate-500">Documento: {displayProfile?.document}</p>
               <p className="text-xs text-slate-500">{displayProfile?.email}</p>
               <p className="text-xs text-slate-500">{displayProfile?.phone}</p>
+              {quote.viewedAt && (
+                  <p className="text-xs text-emerald-600 font-bold mt-1 flex items-center justify-end gap-1">
+                      <span className="material-symbols-outlined text-sm">visibility</span>
+                      Visualizado em {new Date(quote.viewedAt).toLocaleDateString('pt-BR')} às {new Date(quote.viewedAt).toLocaleTimeString('pt-BR')}
+                  </p>
+              )}
             </div>
           </div>
           <p className="text-xs text-slate-400 text-right">Data de Emissão: {new Date().toLocaleDateString('pt-BR')}</p>
@@ -451,7 +464,7 @@ const QuoteSummary: React.FC = () => {
                 <div className="flex flex-col gap-3 w-full">
                   <button
                     onClick={() => {
-                      window.open(`#/v/${quote.public_token}`, '_blank');
+                      window.open(`#/v/${quote.publicToken}`, '_blank');
                       setShowSuccessModal(false);
                     }}
                     className="w-full bg-primary text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark active:scale-95 transition-all flex items-center justify-center gap-2"

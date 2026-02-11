@@ -148,3 +148,9 @@ SET
   subscription_status = 'trial', 
   trial_ends_at = (now() + interval '60 days') 
 WHERE subscription_status IS NULL;
+
+-- 6. Atualizar Tabela de Clientes (Clients) - Correção de Erro de Schema
+-- Adiciona colunas que podem estar faltando se a tabela foi criada em versão antiga
+ALTER TABLE clients 
+ADD COLUMN IF NOT EXISTS document text,
+ADD COLUMN IF NOT EXISTS avatar text;

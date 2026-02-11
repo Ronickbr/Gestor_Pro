@@ -162,6 +162,7 @@ export const quotesService = {
         const { error } = await supabase
             .from('quotes')
             .update({
+                client_id: quote.client.id, // Update client reference
                 status: quote.status,
                 services: quote.services,
                 materials: quote.materials,
@@ -239,7 +240,7 @@ export const quotesService = {
                 phone: client.phone,
                 address: client.address,
                 // avatar: client.avatar, // TODO: Handle image upload
-                // document: client.document
+                document: client.document
             })
             .select()
             .single();
@@ -271,7 +272,7 @@ export const quotesService = {
                 email: client.email,
                 phone: client.phone,
                 address: client.address,
-                // document: client.document
+                document: client.document
             })
             .eq('id', client.id);
 
@@ -307,13 +308,18 @@ export const quotesService = {
     async checkPublicQuoteAccess(token: string) {
         const { data, error } = await supabase.rpc('check_quote_access', { token_input: token });
         if (error) {
+             // Invalid UUID format - definitely doesn't exist
+             if (error.message?.includes('invalid input syntax') || error.code === '22P02') {
+                 return { exists: false, requires_password: false };
+             }
+
              // Fallback: assume exists and no password if RPC missing
              if (error.message?.includes('function not found') || error.code === 'PGRST202') {
                  return { exists: true, requires_password: false };
              }
              // Don't throw here, let getQuote handle it or return safe default
              console.warn('check_quote_access RPC check failed', error);
-             return { exists: true, requires_password: false };
+             throw error; // Throw error to let UI know something is wrong instead of silently failing
         }
         return data as { exists: boolean; requires_password: boolean };
     },
@@ -369,24 +375,42 @@ export const quotesService = {
         // Resolve contract content
         const contractContent = data.contract_content_resolved || data.contract_terms;
 
+        // Helper to safely parse items and ensure numbers
+        const parseServices = (items: any) => {
+            const arr = typeof items === 'string' ? JSON.parse(items) : (items || []);
+            return Array.isArray(arr) ? arr.map((i: any) => ({
+                ...i,
+                price: Number(i.price) || 0
+            })) : [];
+        };
+
+        const parseMaterials = (items: any) => {
+            const arr = typeof items === 'string' ? JSON.parse(items) : (items || []);
+            return Array.isArray(arr) ? arr.map((i: any) => ({
+                ...i,
+                totalPrice: Number(i.totalPrice) || 0,
+                quantity: Number(i.quantity) || 0
+            })) : [];
+        };
+
         return {
             ...data,
             status: mapDbToStatus(data.status),
             client: data.client,
-            services: typeof data.services === 'string' ? JSON.parse(data.services) : data.services,
-            materials: typeof data.materials === 'string' ? JSON.parse(data.materials) : data.materials,
-            companyInfo: data.company_info,
-            validUntil: data.valid_until,
-            warrantyDuration: data.warranty_duration,
-            paymentTerms: data.payment_terms,
-            contractTerms: contractContent,
-            contractNumber: data.contract_number,
-            completionDate: data.completion_date,
-            warrantyUntil: data.warranty_until,
-            signatureData: data.signature_data,
-            viewedAt: data.viewed_at,
-            publicToken: data.public_token,
-            accessPassword: data.access_password
+            services: parseServices(data.services),
+            materials: parseMaterials(data.materials),
+            companyInfo: data.company_info || data.companyInfo,
+            validUntil: data.valid_until || data.validUntil,
+            warrantyDuration: data.warranty_duration || data.warrantyDuration,
+            paymentTerms: data.payment_terms || data.paymentTerms,
+            contractTerms: contractContent || data.contractTerms,
+            contractNumber: data.contract_number || data.contractNumber,
+            completionDate: data.completion_date || data.completionDate,
+            warrantyUntil: data.warranty_until || data.warrantyUntil,
+            signatureData: data.signature_data || data.signatureData,
+            viewedAt: data.viewed_at || data.viewedAt,
+            publicToken: data.public_token || data.publicToken,
+            accessPassword: data.access_password || data.accessPassword
         } as Quote;
     },
 
@@ -400,6 +424,12 @@ export const quotesService = {
             .eq('id', id);
 
         if (error) throw error;
+    },
+
+    async markAsViewed(id: string) {
+        const { error } = await supabase.rpc('mark_quote_viewed', { quote_id_input: id });
+            
+        if (error) console.error('Error marking as viewed:', error);
     }
 };
 
@@ -422,7 +452,9 @@ export const profileService = {
             materialCatalog: data.material_catalog || [],
             contractTemplates: data.contract_templates || [],
             subscriptionStatus: data.subscription_status,
-            trialEndsAt: data.trial_ends_at
+            trialEndsAt: data.trial_ends_at,
+            pixKey: data.pix_key,
+            bankInfo: data.bank_info
         } as UserProfile;
     },
 
@@ -432,18 +464,18 @@ export const profileService = {
 
         // Map camelCase to snake_case for DB update if needed
         const dbUpdates: any = {};
-        if (updates.companyName) dbUpdates.company_name = updates.companyName;
-        if (updates.document) dbUpdates.document = updates.document;
-        if (updates.email) dbUpdates.email = updates.email;
-        if (updates.address) dbUpdates.address = updates.address;
-        if (updates.logo) dbUpdates.logo = updates.logo;
-        if (updates.techSignature) dbUpdates.tech_signature = updates.techSignature;
-        if (updates.materialCatalog) dbUpdates.material_catalog = updates.materialCatalog;
-        if (updates.contractTemplates) dbUpdates.contract_templates = updates.contractTemplates;
-        if (updates.phone) dbUpdates.phone = updates.phone;
-        if (updates.name) dbUpdates.name = updates.name;
-        if (updates.pixKey) dbUpdates.pix_key = updates.pixKey;
-        if (updates.bankInfo) dbUpdates.bank_info = updates.bankInfo;
+        if (updates.companyName !== undefined) dbUpdates.company_name = updates.companyName;
+        if (updates.document !== undefined) dbUpdates.document = updates.document;
+        if (updates.email !== undefined) dbUpdates.email = updates.email;
+        if (updates.address !== undefined) dbUpdates.address = updates.address;
+        if (updates.logo !== undefined) dbUpdates.logo = updates.logo;
+        if (updates.techSignature !== undefined) dbUpdates.tech_signature = updates.techSignature;
+        if (updates.materialCatalog !== undefined) dbUpdates.material_catalog = updates.materialCatalog;
+        if (updates.contractTemplates !== undefined) dbUpdates.contract_templates = updates.contractTemplates;
+        if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+        if (updates.name !== undefined) dbUpdates.name = updates.name;
+        if (updates.pixKey !== undefined) dbUpdates.pix_key = updates.pixKey;
+        if (updates.bankInfo !== undefined) dbUpdates.bank_info = updates.bankInfo;
 
         const { error } = await supabase
             .from('profiles')

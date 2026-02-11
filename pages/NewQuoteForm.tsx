@@ -413,6 +413,7 @@ const NewQuoteForm: React.FC = () => {
                     <img src={client.avatar} className="size-10 rounded-full border border-primary/20" alt="Avatar" />
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-sm truncate">{client.name}</p>
+                      <p className="text-[10px] text-slate-500 truncate">{client.document || 'CPF/CNPJ não informado'}</p>
                       <p className="text-[10px] text-slate-500 truncate">{client.address}</p>
                       <p className="text-[10px] text-slate-400 truncate">{client.phone}</p>
                     </div>

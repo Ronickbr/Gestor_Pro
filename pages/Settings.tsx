@@ -186,7 +186,7 @@ const Settings: React.FC = () => {
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nome Completo</label>
               <input
                 className="w-full bg-white dark:bg-surface-dark border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-primary"
-                value={tempProfile.name}
+                value={tempProfile.name || ''}
                 onChange={e => setTempProfile({ ...tempProfile, name: e.target.value })}
               />
             </div>
@@ -194,7 +194,7 @@ const Settings: React.FC = () => {
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nome da Empresa / Fantasia</label>
               <input
                 className="w-full bg-white dark:bg-surface-dark border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-primary"
-                value={tempProfile.companyName}
+                value={tempProfile.companyName || ''}
                 onChange={e => setTempProfile({ ...tempProfile, companyName: e.target.value })}
               />
             </div>
@@ -202,7 +202,7 @@ const Settings: React.FC = () => {
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">CPF ou CNPJ</label>
               <input
                 className="w-full bg-white dark:bg-surface-dark border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-primary"
-                value={tempProfile.document}
+                value={tempProfile.document || ''}
                 onChange={e => setTempProfile({ ...tempProfile, document: e.target.value })}
               />
             </div>
@@ -211,7 +211,7 @@ const Settings: React.FC = () => {
               <input
                 type="email"
                 className="w-full bg-white dark:bg-surface-dark border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-primary"
-                value={tempProfile.email}
+                value={tempProfile.email || ''}
                 onChange={e => setTempProfile({ ...tempProfile, email: e.target.value })}
               />
             </div>

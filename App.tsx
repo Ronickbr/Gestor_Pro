@@ -24,6 +24,16 @@ import { supabase } from './lib/supabase';
 import { Sidebar } from './components/Sidebar';
 import { Toaster } from 'react-hot-toast';
 import { DialogProvider } from './contexts/DialogContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const BottomNav = () => {
   const location = useLocation();
@@ -137,9 +147,10 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const App: React.FC = () => {
   return (
-    <HashRouter>
-      <DialogProvider>
-        <AppLayout>
+    <QueryClientProvider client={queryClient}>
+      <HashRouter>
+        <DialogProvider>
+          <AppLayout>
           <Routes>
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/terms" element={<Terms />} />
@@ -169,6 +180,7 @@ const App: React.FC = () => {
         <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       </DialogProvider>
     </HashRouter>
+  </QueryClientProvider>
   );
 };
 
