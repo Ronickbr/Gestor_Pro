@@ -235,7 +235,7 @@ const LandingPage: React.FC = () => {
                             <h3 className="text-xl font-bold text-slate-400 mb-2">Mensal</h3>
                             <div className="flex items-baseline justify-center gap-1 mb-2">
                                 <span className="text-sm text-slate-400">R$</span>
-                                <span className="text-4xl font-black text-white">39</span>
+                                <span className="text-4xl font-black text-white">59</span>
                                 <span className="text-slate-400">,90</span>
                             </div>
                             <p className="text-sm text-slate-500 mb-6">Cobrado mensalmente</p>
@@ -257,8 +257,8 @@ const LandingPage: React.FC = () => {
                             <h3 className="text-xl font-bold text-white mb-2">Semestral</h3>
                             <div className="flex items-baseline justify-center gap-1 mb-2">
                                 <span className="text-sm text-slate-400">R$</span>
-                                <span className="text-4xl font-black text-white">34</span>
-                                <span className="text-slate-400">,90</span>
+                                <span className="text-4xl font-black text-white">55</span>
+                                <span className="text-slate-400">,00</span>
                             </div>
                             <p className="text-sm text-slate-500 mb-6">Equivalente mensal</p>
                             <ul className="space-y-4 text-left mb-8 text-slate-300 text-sm">
@@ -277,7 +277,7 @@ const LandingPage: React.FC = () => {
                             <h3 className="text-xl font-bold text-primary mb-2">Anual</h3>
                             <div className="flex items-baseline justify-center gap-1 mb-2">
                                 <span className="text-sm text-slate-400">R$</span>
-                                <span className="text-5xl font-black">29</span>
+                                <span className="text-5xl font-black">49</span>
                                 <span className="text-slate-400">,90</span>
                             </div>
                             <p className="text-sm text-slate-400 mb-6">Equivalente mensal</p>

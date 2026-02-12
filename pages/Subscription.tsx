@@ -5,33 +5,46 @@ import { toast } from 'react-hot-toast';
 
 const PLANS = [
     {
-        name: 'Starter',
-        price: '0,00',
-        frequency: 'mês',
-        features: [
-            '3 Orçamentos por mês',
-            '1 Modelo de Contrato',
-            'Backup Local',
-            'Suporte via Email'
-        ],
-        isPopular: false,
-        buttonText: 'Plano Atual',
-        disabled: true
-    },
-    {
-        name: 'Pro',
-        price: '29,90',
+        name: 'Mensal',
+        price: '59,90',
         frequency: 'mês',
         features: [
             'Orçamentos Ilimitados',
             'Gerador de Contratos com IA',
             'Todos os Modelos Premium',
-            'Backup na Nuvem (Em breve)',
-            'Selo de Profissional Verificado',
-            'Suporte Prioritário via WhatsApp'
+            'Backup na Nuvem',
+            'Suporte via WhatsApp'
+        ],
+        isPopular: false,
+        buttonText: 'Assinar Mensal',
+        disabled: false
+    },
+    {
+        name: 'Semestral',
+        price: '55,00',
+        frequency: 'mês',
+        features: [
+            'Tudo do Plano Mensal',
+            'Economia de R$ 30,00/semestre',
+            'Cobrança Semestral',
+            'Prioridade no Suporte'
+        ],
+        isPopular: false,
+        buttonText: 'Assinar Semestral',
+        disabled: false
+    },
+    {
+        name: 'Anual',
+        price: '49,90',
+        frequency: 'mês',
+        features: [
+            'Tudo do Plano Semestral',
+            'Economia de R$ 120,00/ano',
+            'Cobrança Anual',
+            'Consultoria Exclusiva'
         ],
         isPopular: true,
-        buttonText: 'Assinar Agora',
+        buttonText: 'Assinar Anual',
         disabled: false
     }
 ];
@@ -60,8 +73,12 @@ const Subscription: React.FC = () => {
         setSelectedPlan(planName);
         // Mock payment process
         setTimeout(() => {
-            toast.success(`Obrigado por escolher o plano ${planName}! Redirecionando para pagamento...`);
-            window.open('https://buy.stripe.com/test_123', '_blank');
+            const plan = PLANS.find(p => p.name === planName);
+            const amount = plan ? plan.price : '0,00';
+            const frequency = planName === 'Anual' ? 'ano' : planName === 'Semestral' ? 'semestre' : 'mês';
+            
+            toast.success(`Obrigado por escolher o plano ${planName}! Processando pagamento...`);
+            navigate(`/payment-success?plan=${encodeURIComponent(planName)}&amount=${encodeURIComponent(amount)}&frequency=${encodeURIComponent(frequency)}`);
         }, 1000);
     };
 

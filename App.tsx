@@ -15,6 +15,7 @@ import ContractTemplates from './pages/ContractTemplates';
 import TechSignature from './pages/TechSignature';
 import Login from './pages/Login';
 import Subscription from './pages/Subscription';
+import PaymentSuccess from './pages/PaymentSuccess';
 import PublicQuoteView from './pages/PublicQuoteView';
 import LandingPage from './pages/LandingPage';
 import Terms from './pages/Terms';
@@ -107,9 +108,9 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
         if (!error && data) {
           const isExpired = data.subscription_status === 'expired' ||
-            (data.trial_ends_at && new Date(data.trial_ends_at) < new Date() && data.subscription_status !== 'active');
+            (data.trial_ends_at && new Date(data.trial_ends_at) < new Date());
 
-          if (isExpired && location.pathname !== '/subscription') {
+          if (isExpired && location.pathname !== '/subscription' && location.pathname !== '/payment-success') {
             // Redirect to subscription if expired
             setAuthorized('expired');
             return;
@@ -188,6 +189,7 @@ const App: React.FC = () => {
             <Route path="/contract-templates" element={<PrivateRoute><ContractTemplates /></PrivateRoute>} />
             <Route path="/tech-signature" element={<PrivateRoute><TechSignature /></PrivateRoute>} />
             <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+            <Route path="/payment-success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppLayout>
