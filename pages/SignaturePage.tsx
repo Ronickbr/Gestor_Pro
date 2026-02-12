@@ -176,7 +176,7 @@ const SignaturePage: React.FC = () => {
         </section>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 p-4 pb-8 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-t dark:border-white/5 z-50">
+      <footer className="fixed bottom-[90px] left-0 right-0 p-4 pb-4 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-t dark:border-white/5 z-50">
         <div className="max-w-md mx-auto">
           <button
             disabled={!clientSignature || !techSign}

@@ -15,6 +15,8 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS company_name text;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS document text;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone text;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS address text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 
 -- 2. Tabela clients (Clientes)
 ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS document text;

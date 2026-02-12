@@ -396,7 +396,7 @@ const QuoteSummary: React.FC = () => {
         </div>
 
         {/* FOOTER MOBILE UI & DESKTOP ACTIONS */}
-        <footer className="fixed bottom-0 left-0 right-0 p-4 pb-8 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t dark:border-white/5 z-50 no-print md:absolute md:bottom-0 md:left-0 md:bg-white md:dark:bg-surface-dark md:border-t-0 md:pb-4">
+        <footer className="fixed bottom-[90px] left-0 right-0 p-4 pb-4 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t dark:border-white/5 z-50 no-print md:absolute md:bottom-0 md:left-0 md:bg-white md:dark:bg-surface-dark md:border-t-0 md:pb-4">
           <div className="max-w-md mx-auto space-y-3 md:max-w-none md:flex md:items-end md:justify-end md:space-y-0 md:gap-4 md:px-8">
             {quote.status === QuoteStatus.SENT && (
               <button

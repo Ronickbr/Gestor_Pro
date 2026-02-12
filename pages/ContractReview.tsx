@@ -166,7 +166,7 @@ const ContractReview: React.FC = () => {
           </div>
         </main>
 
-        <footer className="fixed bottom-0 left-0 right-0 p-4 pb-8 bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 z-50 md:hidden">
+        <footer className="fixed bottom-[90px] left-0 right-0 p-4 pb-4 bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 z-50 md:hidden">
           <div className="max-w-md mx-auto space-y-4">
             <label className="flex items-start gap-3 cursor-pointer select-none group">
               <div className={`mt-1 size-5 rounded border flex items-center justify-center transition-colors ${agreed ? 'bg-primary border-primary' : 'bg-white dark:bg-surface-dark border-slate-300 dark:border-white/10'}`}>

@@ -66,7 +66,7 @@ const NewQuoteSelection: React.FC = () => {
         </div>
       </main>
 
-      <div className="fixed bottom-0 left-0 w-full p-4 pb-8 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800">
+      <div className="fixed bottom-[90px] left-0 w-full p-4 pb-4 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800">
         <button 
           onClick={() => navigate('/new-quote/form')}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-white shadow-lg active:scale-95 transition-transform"

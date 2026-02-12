@@ -686,7 +686,7 @@ const NewQuoteForm: React.FC = () => {
           </div>
         </main>
 
-        <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md border-t dark:border-white/5 z-50 md:absolute md:bottom-0 md:left-0 md:right-0 md:border-t md:border-slate-100">
+        <footer className="fixed bottom-[90px] left-0 right-0 p-4 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md border-t dark:border-white/5 z-50 md:absolute md:bottom-0 md:left-0 md:right-0 md:border-t md:border-slate-100">
           <div className="max-w-md mx-auto md:max-w-none md:flex md:justify-end">
             <button
               onClick={handleSave}
