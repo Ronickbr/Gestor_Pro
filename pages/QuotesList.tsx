@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useDialog } from '../contexts/DialogContext';
 import { Quote, QuoteStatus, QuoteStatusLabels } from '../types';
 import { quotesService } from '../services/database';
+import { Avatar } from '../components/ui/Avatar';
 
 const QuotesList: React.FC = () => {
   const navigate = useNavigate();
@@ -112,13 +113,8 @@ const QuotesList: React.FC = () => {
                 className="group relative flex flex-col bg-white dark:bg-surface-dark rounded-2xl border dark:border-white/5 shadow-sm overflow-hidden active:scale-[0.98] transition-transform hover:shadow-md cursor-pointer"
               >
                 <div className="flex gap-4 p-4 items-start">
-                  <div className={`size-12 rounded-xl flex items-center justify-center shrink-0 ${quote.status === QuoteStatus.COMPLETED ? 'bg-emerald-100 text-emerald-600' :
-                    quote.status === QuoteStatus.SENT ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'
-                    }`}>
-                    <span className="material-symbols-outlined filled">
-                      {quote.status === QuoteStatus.COMPLETED ? 'verified' :
-                        quote.status === QuoteStatus.SENT ? 'pending_actions' : 'description'}
-                    </span>
+                  <div className="shrink-0">
+                     <Avatar src={quote.client?.avatar} name={quote.client?.name || 'Cliente'} size="size-12" className="rounded-xl" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-1">

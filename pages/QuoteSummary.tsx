@@ -6,6 +6,8 @@ import { quotesService, profileService } from '../services/database';
 import { ContractPrintView, WarrantyPrintView, QuotePrintView } from '../components/PrintViews';
 import toast from 'react-hot-toast';
 
+import { Avatar } from '../components/ui/Avatar';
+
 const QuoteSummary: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -210,7 +212,7 @@ const QuoteSummary: React.FC = () => {
 
           <div className="flex flex-col md:flex-row md:justify-between md:items-end items-center py-8 bg-white dark:bg-surface-dark md:bg-slate-50 md:dark:bg-white/5 rounded-2xl shadow-sm md:shadow-none md:border md:border-slate-100 md:dark:border-white/5 mb-8 border dark:border-white/5 print:border-none print:shadow-none print:py-4 print:bg-transparent px-8">
             <div className="flex items-center gap-4 bg-white dark:bg-surface-dark md:bg-transparent p-4 md:p-0 rounded-xl w-full md:w-auto mb-4 md:mb-0 print:p-0">
-              <img src={quote.client?.avatar} className="size-14 rounded-full border-2 border-primary/20 no-print object-cover" alt="Avatar" />
+              <Avatar src={quote.client?.avatar} name={quote.client?.name || 'C'} size="size-14" className="shrink-0 border-2 border-primary/20 no-print" />
               <div className="flex-1">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Cliente</p>
                 <p className="font-bold text-lg print:text-base leading-tight">{quote.client?.name || 'Cliente Desconhecido'}</p>

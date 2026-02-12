@@ -80,7 +80,7 @@ export const Sidebar: React.FC = () => {
             </div>
 
             <div className="p-4 text-center">
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Versão 1.0.5</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Versão {import.meta.env.PACKAGE_VERSION}</p>
             </div>
         </aside>
     );

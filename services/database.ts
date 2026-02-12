@@ -107,11 +107,15 @@ export const quotesService = {
         if (!user) throw new Error('Usuário não autenticado');
 
         // Fetch current profile to snapshot company info
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
+
+        if (profileError) {
+            console.error('Erro ao buscar perfil para snapshot:', profileError);
+        }
 
         const companyInfo = profile ? {
             name: profile.name,
@@ -147,7 +151,10 @@ export const quotesService = {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Erro ao criar orçamento:', error);
+            throw error;
+        }
 
         // Save contract draft if provided
         if (quote.contractTerms) {
@@ -239,7 +246,7 @@ export const quotesService = {
                 email: client.email,
                 phone: client.phone,
                 address: client.address,
-                // avatar: client.avatar, // TODO: Handle image upload
+                avatar: client.avatar,
                 document: client.document
             })
             .select()
@@ -442,9 +449,26 @@ export const profileService = {
             .from('profiles')
             .select('*')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
+        
+        // Return default/empty profile if not found
+        if (!data) {
+            return {
+                id: user.id,
+                name: user.email?.split('@')[0] || 'Usuário',
+                email: user.email || '',
+                materialCatalog: [],
+                contractTemplates: [],
+                subscriptionStatus: 'trial',
+                companyName: '',
+                phone: '',
+                address: '',
+                document: ''
+            } as UserProfile;
+        }
+
         return {
             ...data,
             companyName: data.company_name, // map snake_case to camelCase
@@ -463,7 +487,11 @@ export const profileService = {
         if (!user) throw new Error('Usuário não autenticado');
 
         // Map camelCase to snake_case for DB update if needed
-        const dbUpdates: any = {};
+        const dbUpdates: any = {
+            id: user.id, // Ensure ID is present for UPSERT
+            updated_at: new Date().toISOString()
+        };
+        
         if (updates.companyName !== undefined) dbUpdates.company_name = updates.companyName;
         if (updates.document !== undefined) dbUpdates.document = updates.document;
         if (updates.email !== undefined) dbUpdates.email = updates.email;
@@ -477,10 +505,10 @@ export const profileService = {
         if (updates.pixKey !== undefined) dbUpdates.pix_key = updates.pixKey;
         if (updates.bankInfo !== undefined) dbUpdates.bank_info = updates.bankInfo;
 
+        // Use upsert instead of update to handle cases where profile doesn't exist yet
         const { error } = await supabase
             .from('profiles')
-            .update(dbUpdates)
-            .eq('id', user.id);
+            .upsert(dbUpdates, { onConflict: 'id' });
 
         if (error) throw error;
     }

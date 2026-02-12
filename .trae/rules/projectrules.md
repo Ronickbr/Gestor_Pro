@@ -6,7 +6,10 @@ Este arquivo contém regras estritas que devem ser seguidas durante o desenvolvi
 
 1.  **Sempre utilize os dados do arquivo `.env`**
     *   Todas as credenciais e configurações devem ser lidas exclusivamente do arquivo `.env` existente na raiz do projeto.
-    *   Nunca substitua valores de variáveis de ambiente por valores fixos (hardcoded) no código.
+    *   Nunca substitua valores de variáveis de ambiente por valores fixos (hardcoded) no código.¨
+    *   Limpar as ferramentas interna (MCP) para que não esteja "presa" em algum outro projeto, enquanto o seu arquivo .env e o código da aplicação apontam corretamente para o projeto.
+    *   Execute um teste direto (bypassing minha ferramenta interna) e confirme:
+    *   Conecta com sucesso ao projeto correto ( .env ).
 
 2.  **Nunca troque o Banco de Dados**
     *   O projeto deve manter a conexão com o banco de dados atualmente configurado.
@@ -19,5 +22,3 @@ Este arquivo contém regras estritas que devem ser seguidas durante o desenvolvi
         2.  **Verifique se há tabelas estranhas:** Se o banco contiver tabelas como `products`, `categories` (típicas de e-commerce) mas NÃO tiver `quotes`, **PARE IMEDIATAMENTE**.
         3.  **Confirmação:** Se o esquema do banco de dados parecer incorreto ou pertencer a outro tipo de projeto, alerte o usuário e solicite confirmação antes de prosseguir.
         4.  **Não execute DDL (CREATE/ALTER/DROP)** sem antes confirmar que está operando no banco de dados correto do projeto "Gerador de Orçamento".
-
-Estas regras garantem a consistência e a integridade dos dados e do ambiente de desenvolvimento.
