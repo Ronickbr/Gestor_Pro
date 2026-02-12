@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Client } from '../types';
 import { quotesService } from '../services/database';
+import { Avatar } from '../components/ui/Avatar';
 
 const ClientsList: React.FC = () => {
   const navigate = useNavigate();
@@ -74,7 +75,7 @@ const ClientsList: React.FC = () => {
                 onClick={() => navigate(`/edit-client/${client.id}`)}
                 className="bg-white dark:bg-surface-dark p-4 rounded-2xl flex items-center gap-4 shadow-sm active:scale-[0.98] transition-transform cursor-pointer hover:shadow-md border dark:border-white/5"
               >
-                <img src={client.avatar} className="size-12 rounded-full object-cover border-2 border-primary/20" alt="" />
+                <Avatar src={client.avatar} name={client.name} size="size-12" />
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-slate-900 dark:text-white truncate">{client.name}</p>
                   <p className="text-[10px] text-slate-500 font-medium">{client.document}</p>

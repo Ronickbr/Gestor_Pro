@@ -83,3 +83,7 @@ Este projeto está configurado como um PWA. Para testar a funcionalidade de inst
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## ⚠️ Regras do Projeto
+
+Por favor, consulte [PROJECT_RULES.md](PROJECT_RULES.md) para regras importantes sobre a configuração do banco de dados e ambiente.

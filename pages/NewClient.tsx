@@ -1,9 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Client } from '../types';
 import { quotesService } from '../services/database';
+import { supabase } from '../lib/supabase';
+import { Avatar } from '../components/ui/Avatar';
 
 const NewClient: React.FC = () => {
   const { id } = useParams();
@@ -13,11 +15,54 @@ const NewClient: React.FC = () => {
     name: '',
     address: '',
     phone: '',
-    avatar: `https://picsum.photos/seed/${Date.now()}/100/100`,
+    avatar: '',
     document: '',
     email: '',
     createdAt: new Date().toLocaleDateString('pt-BR')
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 2MB');
+      return;
+    }
+
+    const toastId = toast.loading('Enviando imagem...');
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${formData.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // Upload
+      const { error: uploadError } = await supabase.storage
+        .from('client-avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get Public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('client-avatars')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, avatar: publicUrl }));
+      toast.success('Foto atualizada!', { id: toastId });
+    } catch (error: any) {
+      console.error('Erro no upload:', error);
+      toast.error('Erro ao enviar foto: ' + error.message, { id: toastId });
+    }
+  };
 
   useEffect(() => {
     const loadClient = async () => {
@@ -75,8 +120,26 @@ const NewClient: React.FC = () => {
 
       <main className="p-4 space-y-4 overflow-y-auto">
         <div className="flex flex-col items-center py-4">
-          <img src={formData.avatar} className="size-20 rounded-full border-4 border-primary/20 shadow-lg" alt="" />
+          <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+            <Avatar 
+              src={formData.avatar} 
+              name={formData.name} 
+              size="size-24" 
+              className="border-4 border-primary/20 shadow-lg group-hover:border-primary transition-colors" 
+            />
+            <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="material-symbols-outlined text-white">photo_camera</span>
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+          </div>
           <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">Foto do Cliente</p>
+          <p className="text-[10px] text-slate-400">Clique para alterar</p>
         </div>
 
         <div className="space-y-4">
