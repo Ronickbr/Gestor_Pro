@@ -124,13 +124,13 @@ const Settings: React.FC = () => {
 
   if (isEditingProfile && tempProfile) {
     return (
-      <div className="flex flex-col h-screen max-w-md mx-auto bg-background-light dark:bg-background-dark">
-        <header className="sticky top-0 z-50 flex items-center p-4 border-b dark:border-white/5 bg-white dark:bg-surface-dark">
+      <div className="flex flex-col h-screen w-full md:max-w-2xl mx-auto bg-background-light dark:bg-background-dark">
+        <header className="sticky top-0 z-50 flex items-center p-4 border-b dark:border-white/5 bg-white dark:bg-surface-dark shrink-0">
           <button onClick={() => setIsEditingProfile(false)} className="material-symbols-outlined mr-4">close</button>
           <h2 className="font-bold flex-1 text-sm">Editar Perfil Profissional</h2>
           <button onClick={handleSaveProfile} className="text-primary font-bold text-sm">Salvar</button>
         </header>
-        <main className="p-4 space-y-6 overflow-y-auto">
+        <main className="flex-1 p-4 space-y-6 overflow-y-auto">
           <div className="flex flex-col items-center py-6">
             <div className="relative group cursor-pointer">
               <img src={tempProfile.logo || tempProfile.avatar} className="size-24 rounded-full border-4 border-primary/20 shadow-xl object-cover" alt="Preview" />
@@ -144,7 +144,7 @@ const Settings: React.FC = () => {
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-slate-400 tracking-widest">Logo da Empresa</label>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 {tempProfile.logo ? (
                   <div className="relative group">
                     <img src={tempProfile.logo} className="h-16 w-auto object-contain border rounded-lg p-1 bg-white" alt="Logo" />
@@ -320,15 +320,15 @@ const Settings: React.FC = () => {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 space-y-6 md:p-8">
-          <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm flex items-center gap-6 md:bg-slate-50 md:dark:bg-white/5">
+          <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm flex flex-col md:flex-row items-center gap-4 md:gap-6 md:bg-slate-50 md:dark:bg-white/5">
             <img src={profile.logo || profile.avatar} className="size-20 rounded-full border-4 border-white dark:border-surface-dark shadow-lg object-cover ring-2 ring-primary/20" alt="User" />
-            <div className="flex-1 min-w-0">
-              <h3 className="text-2xl font-black truncate text-slate-900 dark:text-white">{profile.name}</h3>
+            <div className="flex-1 min-w-0 text-center md:text-left w-full md:w-auto">
+              <h3 className="text-xl md:text-2xl font-black truncate text-slate-900 dark:text-white">{profile.name}</h3>
               <p className="text-sm text-slate-500 font-medium truncate">{profile.companyName}</p>
             </div>
             <button
               onClick={() => { setTempProfile(profile); setIsEditingProfile(true); }}
-              className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg uppercase tracking-widest hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
+              className="w-full md:w-auto px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg uppercase tracking-widest hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
             >
               Editar
             </button>
