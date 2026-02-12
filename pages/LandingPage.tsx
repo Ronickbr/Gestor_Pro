@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         const checkSession = async () => {
@@ -19,6 +20,7 @@ const LandingPage: React.FC = () => {
         const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
+            setIsMobileMenuOpen(false);
         }
     };
 
@@ -31,12 +33,16 @@ const LandingPage: React.FC = () => {
                         <img src="https://i.imgur.com/6i2hhmf.png" className="size-10 object-contain rounded-xl shadow-lg shadow-primary/20" alt="Logo" />
                         <span className="font-black text-xl tracking-tight">Gestor<span className="text-primary">Pro</span></span>
                     </div>
+
+                    {/* Desktop Menu */}
                     <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
                         <button onClick={() => scrollToSection('features')} className="hover:text-white transition-colors">Funcionalidades</button>
                         <button onClick={() => scrollToSection('benefits')} className="hover:text-white transition-colors">Benefícios</button>
                         <button onClick={() => scrollToSection('pricing')} className="hover:text-white transition-colors">Planos</button>
                     </div>
-                    <div className="flex items-center gap-4">
+
+                    {/* Desktop Actions */}
+                    <div className="hidden md:flex items-center gap-4">
                         <button
                             onClick={() => navigate('/login')}
                             className="text-sm font-bold text-white hover:text-primary transition-colors"
@@ -50,37 +56,82 @@ const LandingPage: React.FC = () => {
                             Começar Grátis
                         </button>
                     </div>
+
+                    {/* Mobile Menu Button */}
+                    <button 
+                        className="md:hidden p-2 text-white active:scale-95 transition-transform"
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        aria-label="Menu"
+                    >
+                        <span className="material-symbols-outlined text-3xl">
+                            {isMobileMenuOpen ? 'close' : 'menu'}
+                        </span>
+                    </button>
                 </div>
+
+                {/* Mobile Menu Overlay */}
+                {isMobileMenuOpen && (
+                    <div className="fixed inset-0 top-20 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-white/5 md:hidden animate-in slide-in-from-top-5 duration-200 flex flex-col p-6 gap-6 h-[calc(100vh-80px)] overflow-y-auto">
+                        <div className="flex flex-col gap-2 text-lg font-medium text-slate-300">
+                            <button onClick={() => scrollToSection('features')} className="text-left hover:text-white py-4 border-b border-white/5 flex items-center justify-between group">
+                                Funcionalidades
+                                <span className="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                            </button>
+                            <button onClick={() => scrollToSection('benefits')} className="text-left hover:text-white py-4 border-b border-white/5 flex items-center justify-between group">
+                                Benefícios
+                                <span className="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                            </button>
+                            <button onClick={() => scrollToSection('pricing')} className="text-left hover:text-white py-4 border-b border-white/5 flex items-center justify-between group">
+                                Planos
+                                <span className="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                            </button>
+                        </div>
+                        <div className="flex flex-col gap-4 mt-auto pb-8">
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="w-full h-14 text-white font-bold border border-white/10 rounded-xl hover:bg-white/5 flex items-center justify-center gap-2"
+                            >
+                                Entrar
+                            </button>
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="w-full h-14 bg-white text-slate-900 rounded-xl font-black hover:bg-slate-200 flex items-center justify-center gap-2 shadow-xl"
+                            >
+                                Começar Grátis <span className="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
             </nav>
 
             {/* Hero Section */}
-            <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden">
+            <section className="relative pt-28 pb-16 md:pt-48 md:pb-32 px-6 overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/20 blur-[120px] rounded-full -z-10 pointer-events-none"></div>
                 <div className="max-w-5xl mx-auto text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-primary mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-primary mb-6 md:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                         <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                         </span>
                         Nova Versão com IA Disponível
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-8 leading-tight animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tight mb-6 md:mb-8 leading-tight animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
                         Transforme Orçamentos em <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-pink-500">Contratos Fechados</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+                    <p className="text-base md:text-xl text-slate-400 mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
                         A ferramenta definitiva para prestadores de serviços. Crie propostas profissionais, gere contratos blindados com IA e receba via Pix em segundos.
                     </p>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
                         <button
                             onClick={() => navigate('/login')}
-                            className="w-full md:w-auto h-14 px-8 rounded-full bg-primary text-white font-bold text-lg hover:bg-primary/90 transition-all hover:scale-105 shadow-xl shadow-primary/25 flex items-center justify-center gap-2"
+                            className="w-full md:w-auto h-14 px-8 rounded-full bg-primary text-white font-bold text-lg hover:bg-primary/90 transition-all hover:scale-105 shadow-xl shadow-primary/25 flex items-center justify-center gap-2 active:scale-95"
                         >
                             Criar Orçamento Agora <span className="material-symbols-outlined">arrow_forward</span>
                         </button>
                         <button
                             onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="w-full md:w-auto h-14 px-8 rounded-full bg-white/5 text-white border border-white/10 font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                            className="w-full md:w-auto h-14 px-8 rounded-full bg-white/5 text-white border border-white/10 font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2 active:scale-95"
                         >
                             <span className="material-symbols-outlined">play_circle</span> Ver Demonstração
                         </button>
@@ -136,11 +187,11 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Features Grid */}
-            <section id="features" className="py-24 px-6 bg-slate-900 relative">
+            <section id="features" className="py-16 md:py-24 px-6 bg-slate-900 relative">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-20">
-                        <h2 className="text-3xl md:text-5xl font-black mb-6">Tudo que você precisa para <br /><span className="text-primary">parecer gigante</span></h2>
-                        <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+                    <div className="text-center mb-12 md:mb-20">
+                        <h2 className="text-2xl md:text-5xl font-black mb-6">Tudo que você precisa para <br /><span className="text-primary">parecer gigante</span></h2>
+                        <p className="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
                             Software completo desenvolvido para eletricistas, encanadores, técnicos de TI, maridos de aluguel e empreendedores.
                         </p>
                     </div>
@@ -181,10 +232,10 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Benefits Section */}
-            <section id="benefits" className="py-24 px-6 bg-slate-950 border-y border-white/5">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
-                    <div className="flex-1 space-y-8">
-                        <h2 className="text-3xl md:text-5xl font-black leading-tight">
+            <section id="benefits" className="py-16 md:py-24 px-6 bg-slate-950 border-y border-white/5">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-16">
+                    <div className="flex-1 space-y-6 md:space-y-8">
+                        <h2 className="text-2xl md:text-5xl font-black leading-tight">
                             Passe confiança antes mesmo de <span className="text-emerald-500">apertar o primeiro parafuso.</span>
                         </h2>
                         <div className="space-y-6">
@@ -225,9 +276,9 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Pricing */}
-            <section id="pricing" className="py-24 px-6 bg-slate-900">
+            <section id="pricing" className="py-16 md:py-24 px-6 bg-slate-900">
                 <div className="max-w-5xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-5xl font-black mb-16">Investimento que se paga <br />ao fechar o <span className="text-primary">primeiro serviço</span></h2>
+                    <h2 className="text-2xl md:text-5xl font-black mb-12 md:mb-16">Investimento que se paga <br />ao fechar o <span className="text-primary">primeiro serviço</span></h2>
 
                     <div className="grid md:grid-cols-3 gap-6 items-center max-w-6xl mx-auto">
                         {/* Monthly Plan */}
@@ -297,10 +348,10 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* CTA Footer */}
-            <footer className="py-24 px-6 bg-slate-950 text-center relative overflow-hidden">
+            <footer className="py-16 md:py-24 px-6 bg-slate-950 text-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
                 <div className="relative z-10 max-w-4xl mx-auto">
-                    <h2 className="text-4xl md:text-6xl font-black mb-8 tracking-tight">Pronto para subir de nível?</h2>
+                    <h2 className="text-3xl md:text-6xl font-black mb-8 tracking-tight">Pronto para subir de nível?</h2>
                     <p className="text-xl text-slate-400 mb-10">Junte-se a milhares de profissionais que estão fechando mais contratos todos os dias.</p>
                     <button
                         onClick={() => navigate('/login')}
