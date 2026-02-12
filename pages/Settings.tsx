@@ -84,8 +84,9 @@ const Settings: React.FC = () => {
       setProfile(tempProfile);
       setIsEditingProfile(false);
       toast.success('Perfil salvo com sucesso!');
-    } catch (e) {
-      toast.error('Erro ao salvar perfil.');
+    } catch (e: any) {
+      console.error('Erro ao salvar perfil:', e);
+      toast.error(`Erro ao salvar perfil: ${e.message || 'Tente novamente'}`);
     }
   };
 

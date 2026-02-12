@@ -510,6 +510,9 @@ export const profileService = {
             .from('profiles')
             .upsert(dbUpdates, { onConflict: 'id' });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Erro Supabase updateProfile:', error);
+            throw error;
+        }
     }
 };
