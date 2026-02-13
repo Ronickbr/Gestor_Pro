@@ -286,6 +286,15 @@ export const quotesService = {
         if (error) throw error;
     },
 
+    async deleteClient(id: string) {
+        const { error } = await supabase
+            .from('clients')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+    },
+
     // --- CONTRACTS ---
     async saveContract(quoteId: string, content: string) {
         // Upsert contract
