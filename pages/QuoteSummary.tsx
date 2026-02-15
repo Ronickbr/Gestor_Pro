@@ -193,7 +193,9 @@ const QuoteSummary: React.FC = () => {
               <span className="material-symbols-outlined text-3xl filled">verified</span>
               <div className="flex-1">
                 <p className="font-bold text-sm">Garantia Ativa ({quote.warrantyDuration} meses)</p>
-                <p className="text-[10px] opacity-90">Expira em: {quote.warrantyUntil}</p>
+                <p className="text-[10px] opacity-90">
+                  Expira em: {quote.warrantyUntil ? new Date(quote.warrantyUntil).toLocaleDateString('pt-BR') : '-'}
+                </p>
               </div>
               <button onClick={() => handlePrint('warranty')} className="bg-white/20 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-white/30 transition-colors">Ver PDF</button>
             </div>
