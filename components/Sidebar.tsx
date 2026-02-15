@@ -32,6 +32,7 @@ export const Sidebar: React.FC = () => {
         { path: '/quotes', label: 'Orçamentos', icon: 'request_quote' },
         { path: '/clients', label: 'Clientes', icon: 'group' },
         { path: '/contract-templates', label: 'Modelos de Contrato', icon: 'description' },
+        { path: '/feedback', label: 'Feedback', icon: 'rate_review' },
         { path: '/settings', label: 'Configurações', icon: 'settings' }
     ];
 
