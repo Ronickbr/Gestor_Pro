@@ -63,6 +63,9 @@ export interface CompanyInfo {
   companyName?: string;
   subscriptionStatus?: 'trial' | 'active' | 'expired';
   trialEndsAt?: string;
+  subscriptionEndsAt?: string;
+  subscriptionPlan?: 'mensal' | 'semestral' | 'anual';
+  subscriptionActivatedAt?: string;
 }
 
 export interface UserProfile extends CompanyInfo {

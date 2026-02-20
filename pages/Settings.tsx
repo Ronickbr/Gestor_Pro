@@ -6,6 +6,16 @@ import { profileService } from '../services/database';
 import { supabase } from '../lib/supabase';
 import { getGeminiApiKey, saveGeminiApiKey } from '../services/ai';
 
+type TopicKey = 'usability' | 'performance' | 'features' | 'design' | 'support';
+
+const topics: { key: TopicKey; title: string }[] = [
+  { key: 'usability', title: 'Usabilidade' },
+  { key: 'performance', title: 'Performance' },
+  { key: 'features', title: 'Funcionalidades' },
+  { key: 'design', title: 'Design' },
+  { key: 'support', title: 'Suporte' }
+];
+
 interface UserProfile {
   name: string;
   email: string;
@@ -16,6 +26,10 @@ interface UserProfile {
   logo?: string;
   pixKey?: string;
   bankInfo?: string;
+  subscriptionStatus?: string;
+  subscriptionPlan?: string;
+  trialEndsAt?: string;
+  subscriptionEndsAt?: string;
   [key: string]: any;
 }
 
@@ -42,6 +56,25 @@ const Settings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [ratings, setRatings] = useState<Record<TopicKey, number>>({
+    usability: 3,
+    performance: 3,
+    features: 3,
+    design: 3,
+    support: 3
+  });
+  const [comments, setComments] = useState<Record<TopicKey, string>>({
+    usability: '',
+    performance: '',
+    features: '',
+    design: '',
+    support: ''
+  });
+  const [nps, setNps] = useState<number>(7);
+  const [general, setGeneral] = useState<string>('');
+  const [improvements, setImprovements] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState<boolean>(false);
 
   useEffect(() => {
     loadProfile();
@@ -126,8 +159,93 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleSubmitFeedback = async () => {
+    if (isSubmittingFeedback) return;
+    setIsSubmittingFeedback(true);
+    try {
+      const payload = {
+        ratings,
+        comments,
+        nps,
+        general,
+        improvements,
+        email,
+        createdAt: new Date().toISOString()
+      };
+      console.log('Feedback enviado:', payload);
+      toast.success('Obrigado pelo feedback!');
+      setRatings({ usability: 3, performance: 3, features: 3, design: 3, support: 3 });
+      setComments({ usability: '', performance: '', features: '', design: '', support: '' });
+      setNps(7);
+      setGeneral('');
+      setImprovements('');
+      setEmail('');
+    } catch (e) {
+      console.error(e);
+      toast.error('Não foi possível enviar seu feedback agora.');
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
   if (isLoading) return <div className="h-screen flex items-center justify-center animate-pulse">Carregando...</div>;
   if (!profile) return <div className="p-10 text-center">Erro ao carregar perfil.</div>;
+
+  const getSubscriptionInfo = () => {
+    const now = new Date();
+    const trialEnds = profile.trialEndsAt ? new Date(profile.trialEndsAt) : null;
+    const subscriptionEnds = profile.subscriptionEndsAt ? new Date(profile.subscriptionEndsAt) : null;
+
+    let isExpired = false;
+
+    if (profile.subscriptionStatus === 'expired') {
+      isExpired = true;
+    } else if (profile.subscriptionStatus === 'active' && subscriptionEnds && subscriptionEnds < now) {
+      isExpired = true;
+    } else if (profile.subscriptionStatus === 'trial' && trialEnds && trialEnds < now) {
+      isExpired = true;
+    }
+
+    if (isExpired) {
+      return {
+        label: 'Plano Expirado',
+        mode: 'expired' as const,
+        description: 'Seu acesso está pausado. Renove a assinatura para continuar usando todos os recursos.',
+        badgeClass: 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300',
+        dotClass: 'bg-red-500',
+        icon: 'error'
+      };
+    }
+
+    if (profile.subscriptionStatus === 'active') {
+      const planLabel =
+        profile.subscriptionPlan === 'anual'
+          ? 'Premium Anual'
+          : profile.subscriptionPlan === 'semestral'
+          ? 'Premium Semestral'
+          : 'Premium Mensal';
+
+      return {
+        label: planLabel,
+        mode: 'premium' as const,
+        description: 'Você está com todas as funcionalidades PRO desbloqueadas.',
+        badgeClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300',
+        dotClass: 'bg-emerald-500',
+        icon: 'diamond'
+      };
+    }
+
+    return {
+      label: 'Modo Trial',
+      mode: 'trial' as const,
+      description: 'Você está no período de teste gratuito do Gestor Pro.',
+      badgeClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300',
+      dotClass: 'bg-amber-500',
+      icon: 'hourglass_top'
+    };
+  };
+
+  const subscriptionInfo = getSubscriptionInfo();
 
   const tabs = [
     { id: 'geral', label: 'Geral', icon: 'person' },
@@ -233,6 +351,20 @@ const Settings: React.FC = () => {
                 {activeTab === 'financeiro' && 'Informações de pagamento e recebimento'}
                 {activeTab === 'sistema' && 'Configurações do aplicativo e IA'}
               </p>
+              <div className="mt-3 inline-flex items-start gap-3">
+                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${subscriptionInfo.badgeClass}`}>
+                  <span className={`w-2 h-2 rounded-full ${subscriptionInfo.dotClass} animate-pulse`} />
+                  <span className="material-symbols-outlined text-xs">{subscriptionInfo.icon}</span>
+                  <span>{subscriptionInfo.label}</span>
+                </div>
+                <button
+                  onClick={() => navigate('/subscription')}
+                  className="hidden md:inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-primary hover:underline"
+                >
+                  <span className="material-symbols-outlined text-xs">open_in_new</span>
+                  <span>Ver planos</span>
+                </button>
+              </div>
             </div>
             <button
               onClick={handleSaveProfile}
@@ -471,6 +603,152 @@ const Settings: React.FC = () => {
                       <span className="font-medium text-slate-900 dark:text-white group-hover:text-red-600 transition-colors">Limpar Catálogo de Materiais</span>
                     </div>
                   </button>
+                </div>
+
+                {/* Feedback */}
+                <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm space-y-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg text-emerald-600">
+                        <span className="material-symbols-outlined">rate_review</span>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-800 dark:text-white">Feedback sobre o GestorPro</h3>
+                        <p className="text-xs text-slate-500">
+                          Nos ajude a melhorar contando como está sua experiência.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleSubmitFeedback}
+                      disabled={isSubmittingFeedback}
+                      className="hidden md:inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isSubmittingFeedback ? (
+                        <>
+                          <span className="material-symbols-outlined animate-spin text-sm">refresh</span>
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-sm">send</span>
+                          Enviar Feedback
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="space-y-6">
+                    <section>
+                      <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-sm">Avaliação Geral (NPS)</h4>
+                      <p className="text-xs text-slate-500 mb-4">
+                        Qual a probabilidade de você recomendar o GestorPro para alguém?
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min={0}
+                          max={10}
+                          value={nps}
+                          onChange={(e) => setNps(Number(e.target.value))}
+                          className="flex-1"
+                        />
+                        <div className="w-10 text-center text-sm font-bold">{nps}</div>
+                      </div>
+                      <div className="mt-3">
+                        <textarea
+                          value={general}
+                          onChange={(e) => setGeneral(e.target.value)}
+                          placeholder="Conte mais sobre sua experiência geral."
+                          className="w-full bg-slate-50 dark:bg-background-dark rounded-xl p-3 text-sm focus:outline-none"
+                          rows={3}
+                        />
+                      </div>
+                    </section>
+
+                    {topics.map((t) => (
+                      <section key={t.key} className="space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <h4 className="font-bold text-slate-900 dark:text-white text-sm">{t.title}</h4>
+                          <div className="flex items-center gap-1.5">
+                            {[1, 2, 3, 4, 5].map((v) => (
+                              <button
+                                key={v}
+                                onClick={() => setRatings({ ...ratings, [t.key]: v })}
+                                className={`size-7 rounded-lg border text-[11px] font-bold ${
+                                  ratings[t.key] === v
+                                    ? 'bg-primary text-white border-primary'
+                                    : 'bg-white dark:bg-surface-dark text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'
+                                }`}
+                                aria-label={`${t.title} nota ${v}`}
+                              >
+                                {v}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <textarea
+                          value={comments[t.key]}
+                          onChange={(e) => setComments({ ...comments, [t.key]: e.target.value })}
+                          placeholder={`Deixe comentários sobre ${t.title}.`}
+                          className="w-full bg-slate-50 dark:bg-background-dark rounded-xl p-3 text-sm focus:outline-none"
+                          rows={3}
+                        />
+                      </section>
+                    ))}
+
+                    <section className="space-y-3">
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white mb-1 text-sm">Melhorias e problemas</h4>
+                        <p className="text-xs text-slate-500">
+                          Que tipo de melhorias você gostaria de ver ou quais partes não estão funcionando bem?
+                        </p>
+                      </div>
+                      <textarea
+                        value={improvements}
+                        onChange={(e) => setImprovements(e.target.value)}
+                        placeholder="Ex.: Tela de clientes lenta, gostaria de relatórios por período, dúvida em alguma etapa..."
+                        className="w-full bg-slate-50 dark:bg-background-dark rounded-xl p-3 text-sm focus:outline-none"
+                        rows={4}
+                      />
+                    </section>
+
+                    <section className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1 text-sm">Contato (opcional)</h4>
+                          <p className="text-[11px] text-slate-500">
+                            Se quiser, deixe seu e-mail para que possamos responder.
+                          </p>
+                        </div>
+                      </div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Seu e-mail para contato"
+                        className="w-full bg-slate-50 dark:bg-background-dark rounded-xl p-3 text-sm focus:outline-none"
+                      />
+                    </section>
+
+                    <button
+                      onClick={handleSubmitFeedback}
+                      disabled={isSubmittingFeedback}
+                      className="w-full md:hidden bg-primary text-white px-4 py-3 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {isSubmittingFeedback ? (
+                        <>
+                          <span className="material-symbols-outlined animate-spin text-sm">refresh</span>
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-sm">send</span>
+                          Enviar Feedback
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                  {/* Install App */}

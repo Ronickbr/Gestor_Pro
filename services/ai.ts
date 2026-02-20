@@ -1,7 +1,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Quote } from '../types';
-import { profileService } from './database';
+import { ensureAccountNotExpired, profileService } from './database';
 
 const API_KEY_STORAGE_KEY = 'gestor_pro_gemini_api_key';
 const RATE_LIMIT_KEY = 'gestor_pro_ai_last_request';
@@ -20,9 +20,7 @@ const sanitizeInput = (input: string): string => {
     return input.replace(/[<>]/g, '').trim().substring(0, 5000); // Remove potential HTML tags and limit length
 };
 
-// Security & Access Control: Check Subscription and Rate Limit
-const checkAccess = async () => {
-    // 1. Rate Limiting
+const checkAccess = async (action: string) => {
     const lastRequest = localStorage.getItem(RATE_LIMIT_KEY);
     if (lastRequest) {
         const timeDiff = Date.now() - parseInt(lastRequest);
@@ -31,7 +29,8 @@ const checkAccess = async () => {
         }
     }
 
-    // 2. Subscription Check
+    await ensureAccountNotExpired(action);
+
     try {
         const profile = await profileService.getProfile();
         const isActive = profile.subscriptionStatus === 'active';
@@ -48,12 +47,11 @@ const checkAccess = async () => {
         throw new Error('Não foi possível verificar sua assinatura. Tente novamente.');
     }
 
-    // Update rate limit timestamp
     localStorage.setItem(RATE_LIMIT_KEY, Date.now().toString());
 };
 
 export const generateClauses = async (quote: Quote): Promise<string> => {
-    await checkAccess();
+    await checkAccess('ai_generate_clauses');
 
     const apiKey = getGeminiApiKey();
     if (!apiKey) {
@@ -112,7 +110,7 @@ export const generateClauses = async (quote: Quote): Promise<string> => {
 };
 
 export const generateTemplate = async (templateName: string): Promise<string> => {
-    await checkAccess();
+    await checkAccess('ai_generate_template');
 
     const apiKey = getGeminiApiKey();
     if (!apiKey) {

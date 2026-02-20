@@ -72,14 +72,13 @@ const Dashboard: React.FC = () => {
     const rejectedCount = quotes.filter(q => q.status === QuoteStatus.REJECTED).length;
 
     const activeContractsCount = approvedCount + completedCount;
-    
-    // Conversion Rate
+    const totalQuotes = quotes.length;
+
     const totalFinished = approvedCount + completedCount + rejectedCount;
     const conversionRate = totalFinished > 0 
       ? Math.round(((approvedCount + completedCount) / totalFinished) * 100) 
       : 0;
 
-    // Monthly Revenue (Current Month)
     const currentMonthRevenue = quotes
       .filter(q => {
         const d = parseDate(q.date);
@@ -91,8 +90,17 @@ const Dashboard: React.FC = () => {
         return acc + servicesTotal + materialsTotal;
       }, 0);
 
-    // Average Ticket
-    const avgTicket = quotes.length > 0 ? totalValue / quotes.length : 0;
+    const createdThisMonth = quotes.filter(q => {
+      const d = parseDate(q.date);
+      return d && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    }).length;
+
+    const approvedThisMonth = quotes.filter(q => {
+      const d = parseDate(q.date);
+      return d && d.getMonth() === currentMonth && d.getFullYear() === currentYear && (q.status === QuoteStatus.APPROVED || q.status === QuoteStatus.COMPLETED);
+    }).length;
+
+    const avgTicket = totalQuotes > 0 ? totalValue / totalQuotes : 0;
 
     return {
       totalValue,
@@ -100,7 +108,10 @@ const Dashboard: React.FC = () => {
       activeContractsCount,
       conversionRate,
       currentMonthRevenue,
-      avgTicket
+      avgTicket,
+      totalQuotes,
+      createdThisMonth,
+      approvedThisMonth
     };
   }, [quotes]);
 
@@ -244,7 +255,6 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Revenue */}
         <div className="bg-white dark:bg-surface-dark p-5 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 flex flex-col justify-between h-32">
@@ -307,6 +317,44 @@ const Dashboard: React.FC = () => {
           <div>
             <p className="text-slate-500 text-xs font-medium">Orçamentos Pendentes</p>
             <p className="text-lg font-bold text-slate-900 dark:text-white">{metrics.pendingCount}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 flex items-center justify-between">
+          <div>
+            <p className="text-slate-500 text-xs font-medium">Ticket Médio</p>
+            <p className="text-lg font-bold text-slate-900 dark:text-white">
+              R$ {metrics.avgTicket.toLocaleString('pt-BR')}
+            </p>
+          </div>
+          <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600">
+            <span className="material-symbols-outlined text-base">trending_up</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 flex items-center justify-between">
+          <div>
+            <p className="text-slate-500 text-xs font-medium">Orçamentos no mês</p>
+            <p className="text-lg font-bold text-slate-900 dark:text-white">
+              {metrics.createdThisMonth}
+            </p>
+          </div>
+          <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600">
+            <span className="material-symbols-outlined text-base">calendar_today</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 flex items-center justify-between">
+          <div>
+            <p className="text-slate-500 text-xs font-medium">Aprovados no mês</p>
+            <p className="text-lg font-bold text-slate-900 dark:text-white">
+              {metrics.approvedThisMonth}
+            </p>
+          </div>
+          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-500/20 text-blue-600">
+            <span className="material-symbols-outlined text-base">task_alt</span>
           </div>
         </div>
       </div>

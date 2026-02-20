@@ -6,6 +6,7 @@ import { Client } from '../types';
 import { quotesService } from '../services/database';
 import { supabase } from '../lib/supabase';
 import { Avatar } from '../components/ui/Avatar';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 
 const NewClient: React.FC = () => {
   const { id } = useParams();
@@ -22,6 +23,7 @@ const NewClient: React.FC = () => {
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -79,6 +81,20 @@ const NewClient: React.FC = () => {
     loadClient();
   }, [id, navigate]);
 
+  const handleDelete = async () => {
+    if (!id) return;
+    try {
+      await quotesService.deleteClient(id);
+      toast.success('Cliente deletado com sucesso!');
+      navigate('/clients');
+    } catch (error: any) {
+      console.error('Erro ao deletar cliente:', error);
+      toast.error('Não foi possível deletar o cliente. Verifique se existem orçamentos vinculados.');
+    } finally {
+      setDeleteDialogOpen(false);
+    }
+  };
+
   const handleSave = async () => {
     // Basic validation
     if (!formData.name) {
@@ -112,6 +128,15 @@ const NewClient: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto bg-background-light dark:bg-background-dark">
+      <ConfirmDialog
+        isOpen={deleteDialogOpen}
+        title="Excluir Cliente"
+        message="Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita."
+        confirmLabel="Excluir"
+        variant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteDialogOpen(false)}
+      />
       <header className="sticky top-0 z-50 flex items-center p-4 bg-white dark:bg-surface-dark border-b dark:border-white/5">
         <button onClick={() => navigate(-1)} className="material-symbols-outlined mr-4">arrow_back</button>
         <h2 className="font-bold flex-1">{id ? 'Editar Cliente' : 'Novo Cliente'}</h2>
@@ -157,6 +182,18 @@ const NewClient: React.FC = () => {
             />
           </div>
         </div>
+
+        {id && (
+          <div className="pt-4">
+            <button
+              onClick={() => setDeleteDialogOpen(true)}
+              className="w-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 font-bold py-3 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-base">delete</span>
+              Excluir cliente
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

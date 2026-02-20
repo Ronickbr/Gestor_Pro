@@ -11,6 +11,68 @@ const calculateTotal = (quote: Partial<Quote>) => {
         (quote.materials?.reduce((a, b) => a + (b.totalPrice || 0), 0) || 0);
 };
 
+export const isAccountExpired = (data: { subscription_status?: string | null; subscription_ends_at?: string | null; trial_ends_at?: string | null }) => {
+    const now = new Date();
+
+    if (data.subscription_status === 'expired') {
+        return true;
+    }
+
+    if (data.subscription_status === 'active' && data.subscription_ends_at) {
+        if (new Date(data.subscription_ends_at) < now) {
+            return true;
+        }
+    }
+
+    if (data.subscription_status === 'trial' && data.trial_ends_at) {
+        if (new Date(data.trial_ends_at) < now) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+export const ensureAccountNotExpired = async (action: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Usuário não autenticado');
+
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('subscription_status, trial_ends_at, subscription_ends_at, subscription_plan')
+        .eq('id', user.id)
+        .single();
+
+    if (error || !data) {
+        throw new Error('Não foi possível verificar sua assinatura. Acesse a tela de Assinatura e tente novamente.');
+    }
+
+    if (!isAccountExpired(data)) {
+        return;
+    }
+
+    const now = new Date().toISOString();
+
+    try {
+        await supabase.from('subscription_audit_logs').insert({
+            user_id: user.id,
+            event: 'blocked_action',
+            plan: data.subscription_plan,
+            details: {
+                action,
+                subscription_status: data.subscription_status,
+                subscription_ends_at: data.subscription_ends_at,
+                trial_ends_at: data.trial_ends_at,
+                blocked_at: now
+            }
+        });
+    } catch (e) {
+        console.error('Erro ao registrar tentativa bloqueada:', e);
+    }
+
+    throw new Error('Sua assinatura expirou. Acesse a tela de Assinatura e renove seu plano para continuar usando este recurso.');
+};
+
 export const quotesService = {
     // --- QUOTES ---
     async fetchQuotes() {
@@ -105,6 +167,8 @@ export const quotesService = {
     async createQuote(quote: Omit<Quote, 'id'>) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Usuário não autenticado');
+
+        await ensureAccountNotExpired('create_quote');
 
         // Fetch current profile to snapshot company info
         const { data: profile, error: profileError } = await supabase
@@ -237,6 +301,8 @@ export const quotesService = {
     async createClient(client: Omit<Client, 'id'>) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Usuário não autenticado');
+
+        await ensureAccountNotExpired('create_client');
 
         const { data, error } = await supabase
             .from('clients')
@@ -468,13 +534,13 @@ export const profileService = {
                 id: user.id,
                 name: user.email?.split('@')[0] || 'Usuário',
                 email: user.email || '',
-                materialCatalog: [],
-                contractTemplates: [],
                 subscriptionStatus: 'trial',
                 companyName: '',
                 phone: '',
                 address: '',
-                document: ''
+                document: '',
+                materialCatalog: [],
+                contractTemplates: []
             } as UserProfile;
         }
 
@@ -486,6 +552,9 @@ export const profileService = {
             contractTemplates: data.contract_templates || [],
             subscriptionStatus: data.subscription_status,
             trialEndsAt: data.trial_ends_at,
+            subscriptionEndsAt: data.subscription_ends_at,
+            subscriptionPlan: data.subscription_plan,
+            subscriptionActivatedAt: data.subscription_activated_at,
             pixKey: data.pix_key,
             bankInfo: data.bank_info
         } as UserProfile;

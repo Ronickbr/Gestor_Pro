@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { profileService } from '../services/database';
+import { ExpiredAccountBanner } from '../components/ExpiredAccountBanner';
 
 const PLANS = [
     {
@@ -56,6 +57,12 @@ const PLANS = [
     }
 ];
 
+const PAYMENT_LINKS: Record<string, string> = {
+    mensal: 'https://invoice.infinitepay.io/plans/rnbudel_pay/CaBJ9RnvR',
+    semestral: 'https://invoice.infinitepay.io/plans/rnbudel_pay/1pFe5l8YwV',
+    anual: 'https://invoice.infinitepay.io/plans/rnbudel_pay/2R0ENMqZdx'
+};
+
 const FAQS = [
     {
         question: 'Posso cancelar a qualquer momento?',
@@ -95,22 +102,59 @@ const Subscription: React.FC = () => {
         loadProfile();
     }, []);
 
-    const isExpired = profile?.subscriptionStatus === 'expired' ||
-        (profile?.trialEndsAt && new Date(profile.trialEndsAt) < new Date() && profile?.subscriptionStatus !== 'active');
+    const isExpired = (() => {
+        if (!profile) return false;
+        const now = new Date();
+
+        if (profile.subscriptionStatus === 'expired') return true;
+
+        if (profile.subscriptionEndsAt && profile.subscriptionStatus === 'active') {
+            return new Date(profile.subscriptionEndsAt) < now;
+        }
+
+        if (profile.trialEndsAt && profile.subscriptionStatus === 'trial') {
+            return new Date(profile.trialEndsAt) < now;
+        }
+
+        return false;
+    })();
 
     const handleSubscribe = (plan: typeof PLANS[0]) => {
+        if (plan.disabled) return;
+
         setSelectedPlan(plan.name);
-        
-        // Simulação de checkout
-        const loadingToast = toast.loading('Iniciando checkout seguro...');
-        
+
+        const paymentLink = PAYMENT_LINKS[plan.id];
+
+        if (!paymentLink) {
+            toast.error('Link de pagamento não disponível para este plano.');
+            setSelectedPlan(null);
+            return;
+        }
+
+        const frequency = plan.id === 'anual' ? 'ano' : plan.id === 'semestral' ? 'semestre' : 'mês';
+
+        try {
+            localStorage.setItem(
+                'gestor_pro_last_checkout',
+                JSON.stringify({
+                    planId: plan.id,
+                    planName: plan.name,
+                    amount: plan.price,
+                    frequency,
+                    startedAt: new Date().toISOString()
+                })
+            );
+        } catch {
+            // Ignore storage errors and continue with redirect
+        }
+
+        const loadingToast = toast.loading('Redirecionando para pagamento seguro...');
+
         setTimeout(() => {
             toast.dismiss(loadingToast);
-            const amount = plan.price;
-            const frequency = plan.name === 'Anual' ? 'ano' : plan.name === 'Semestral' ? 'semestre' : 'mês';
-            
-            navigate(`/payment-success?plan=${encodeURIComponent(plan.name)}&amount=${encodeURIComponent(amount)}&frequency=${encodeURIComponent(frequency)}`);
-        }, 1500);
+            window.location.href = paymentLink;
+        }, 800);
     };
 
     if (isLoading) {
@@ -143,25 +187,21 @@ const Subscription: React.FC = () => {
 
                 <div className="max-w-4xl mx-auto text-center relative z-10 animate-in slide-in-from-bottom-4 duration-700">
                     {isExpired ? (
-                        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold uppercase tracking-wider mb-6">
-                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                            Período de Teste Finalizado
-                        </span>
+                        <ExpiredAccountBanner />
                     ) : (
-                        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-6">
-                            <span className="material-symbols-outlined text-sm">verified</span>
-                            Planos e Preços
-                        </span>
+                        <>
+                            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-6">
+                                <span className="material-symbols-outlined text-sm">verified</span>
+                                Planos e Preços
+                            </span>
+                            <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">
+                                Invista no Crescimento do seu Negócio
+                            </h1>
+                            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                                Junte-se a centenas de profissionais que fecham mais contratos e organizam suas empresas com o Gestor Pro.
+                            </p>
+                        </>
                     )}
-
-                    <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">
-                        {isExpired ? 'Desbloqueie seu Acesso' : 'Invista no Crescimento do seu Negócio'}
-                    </h1>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                        {isExpired
-                            ? 'Sua conta está pausada. Escolha um plano abaixo para retomar o acesso imediato a todas as ferramentas.'
-                            : 'Junte-se a centenas de profissionais que fecham mais contratos e organizam suas empresas com o Gestor Pro.'}
-                    </p>
                 </div>
             </div>
 
