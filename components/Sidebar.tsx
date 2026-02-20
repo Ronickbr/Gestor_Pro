@@ -36,7 +36,7 @@ export const Sidebar: React.FC = () => {
     ];
 
     return (
-        <aside className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-white/5 md:translate-x-0 hidden md:flex flex-col">
+        <aside className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-white/5 lg:translate-x-0 hidden lg:flex flex-col">
             <div className="h-20 flex items-center px-6 border-b border-slate-100 dark:border-white/5">
                 <img src="https://i.imgur.com/6i2hhmf.png" className="h-8 w-auto object-contain" alt="Gestor Pro" />
                 <span className="ml-3 font-black text-lg text-slate-900 dark:text-white tracking-tight">Gestor<span className="text-primary">Pro</span></span>

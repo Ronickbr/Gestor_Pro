@@ -127,7 +127,7 @@ const NewClient: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-background-light dark:bg-background-dark">
+    <div className="flex flex-col h-screen w-full max-w-md md:max-w-2xl mx-auto bg-background-light dark:bg-background-dark">
       <ConfirmDialog
         isOpen={deleteDialogOpen}
         title="Excluir Cliente"

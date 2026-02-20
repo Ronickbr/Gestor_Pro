@@ -53,7 +53,7 @@ const BottomNav = () => {
   if (['/', '/login', '/subscription', '/landing', '/terms', '/privacy', '/contact'].includes(location.pathname) || location.pathname.startsWith('/v/')) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 z-50 w-full bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-white/5 pb-6 pt-2 px-6 shadow-lg no-print md:hidden">
+    <nav className="fixed bottom-0 left-0 z-50 w-full bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-white/5 pb-6 pt-2 px-6 shadow-lg no-print lg:hidden">
       <div className="flex items-center justify-between">
         {tabs.map((tab) => {
           if (tab.isFab) {
@@ -181,7 +181,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-background-light dark:bg-background-dark">
       {!isFullWidth && <Sidebar />}
-      <div className={`flex-1 w-full transition-all duration-300 ${!isFullWidth ? 'md:pl-64 pb-20 md:pb-0' : ''}`}>
+      <div className={`flex-1 w-full transition-all duration-300 ${!isFullWidth ? 'lg:pl-64 pb-20 lg:pb-0' : ''}`}>
         {children}
         {!isFullWidth && <ConditionalBottomNav />}
       </div>

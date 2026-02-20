@@ -379,10 +379,10 @@ const NewQuoteForm: React.FC = () => {
         </header>
 
         <main className="p-4 space-y-6 pb-40 md:p-8 md:pb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
 
             {/* Left Column: Client Data & Settings */}
-            <div className="lg:col-span-4 space-y-6">
+            <div className="md:col-span-4 space-y-6">
               <section className="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border dark:border-white/5 md:border md:border-slate-100 md:shadow-none">
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cliente</h3>
@@ -561,7 +561,7 @@ const NewQuoteForm: React.FC = () => {
             </div>
 
             {/* Right Column: Services & Materials */}
-            <div className="lg:col-span-8 space-y-6">
+            <div className="md:col-span-8 space-y-6">
 
               {/* Serviços */}
               <section className="space-y-3">
