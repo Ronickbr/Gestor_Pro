@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { emailService } from '../services/email';
+import { supabase } from '../lib/supabase';
 
 type TopicKey = 'usability' | 'performance' | 'features' | 'design' | 'support';
 
@@ -31,9 +33,20 @@ const Feedback: React.FC = () => {
   const [improvements, setImprovements] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserId(user.id);
+        if (!email) setEmail(user.email || '');
+      }
+    });
+  }, []);
 
   const submit = async () => {
     if (isSubmitting) return;
+
     setIsSubmitting(true);
     try {
       const payload = {
@@ -42,17 +55,21 @@ const Feedback: React.FC = () => {
         nps,
         general,
         improvements,
-        email,
+        email: email || 'usuario@gestorpro.com', // Fallback se não preenchido
+        userId,
         createdAt: new Date().toISOString()
       };
-      console.log('Feedback enviado:', payload);
+
+      await emailService.sendFeedback(payload);
+
       toast.success('Obrigado pelo feedback!');
+
+      // Reset formulário
       setRatings({ usability: 3, performance: 3, features: 3, design: 3, support: 3 });
       setComments({ usability: '', performance: '', features: '', design: '', support: '' });
       setNps(7);
       setGeneral('');
       setImprovements('');
-      setEmail('');
     } catch (e) {
       console.error(e);
       toast.error('Não foi possível enviar seu feedback agora.');
@@ -111,11 +128,10 @@ const Feedback: React.FC = () => {
                   <button
                     key={v}
                     onClick={() => setRatings({ ...ratings, [t.key]: v })}
-                    className={`size-9 rounded-lg border text-sm font-bold ${
-                      ratings[t.key] === v
+                    className={`size-9 rounded-lg border text-sm font-bold ${ratings[t.key] === v
                         ? 'bg-primary text-white border-primary'
                         : 'bg-white dark:bg-surface-dark text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'
-                    }`}
+                      }`}
                     aria-label={`${t.title} nota ${v}`}
                   >
                     {v}
