@@ -1,7 +1,7 @@
 {
-  "name": "gestor-de-serviços-pro",
+  "name": "gestor-de-servicos-pro",
   "private": true,
-  "version": "1.6.0",
+  "version": "1.6.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -28,6 +28,7 @@
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.24",
     "postcss": "^8.5.6",
+    "supabase": "^2.78.1",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"

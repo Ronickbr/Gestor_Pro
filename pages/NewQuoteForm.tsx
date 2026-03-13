@@ -15,12 +15,8 @@ interface ValidationError {
   };
 }
 
-interface CatalogItem {
-  id?: string;
-  name: string;
-  price: number;
-  category: string;
-}
+// Local type for catalog suggestions that maps to MaterialItem
+type CatalogItem = MaterialItem;
 
 const NewQuoteForm: React.FC = () => {
   const navigate = useNavigate();
@@ -39,7 +35,7 @@ const NewQuoteForm: React.FC = () => {
   ]);
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<{ id: string, index: number } | null>(null);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<{ id: string, type: 'service' | 'material' } | null>(null);
 
   const [errors, setErrors] = useState<ValidationError>({});
   const [showErrors, setShowErrors] = useState(false);
@@ -163,9 +159,14 @@ const NewQuoteForm: React.FC = () => {
     }
   };
 
-  const selectFromCatalog = (id: string, item: CatalogItem) => {
-    updateMaterial(id, 'name', item.name);
-    updateMaterial(id, 'unitPrice', item.price);
+  const selectFromCatalog = (id: string, item: CatalogItem, type: 'service' | 'material') => {
+    if (type === 'service') {
+      updateService(id, 'name', item.name);
+      updateService(id, 'price', item.unitPrice);
+    } else {
+      updateMaterial(id, 'name', item.name);
+      updateMaterial(id, 'unitPrice', item.unitPrice);
+    }
     setActiveSuggestionIndex(null);
   };
 
@@ -228,7 +229,14 @@ const NewQuoteForm: React.FC = () => {
 
       materials.forEach(m => {
         if (!currentCatalog.find((c: any) => c.name === m.name)) {
-          newItems.push({ name: m.name, price: m.unitPrice, category: 'Geral' });
+          newItems.push({ 
+            id: crypto.randomUUID(),
+            name: m.name, 
+            unitPrice: m.unitPrice, 
+            brand: m.brand || 'Geral',
+            quantity: 1,
+            totalPrice: m.unitPrice
+          });
         }
       });
 
@@ -572,13 +580,33 @@ const NewQuoteForm: React.FC = () => {
                 <div className="space-y-3">
                   {services.map((s) => (
                     <div key={s.id} className="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border dark:border-white/5 flex gap-4 items-start md:border md:border-slate-100 md:shadow-none transition-all hover:border-primary/30">
-                      <div className="flex-1 space-y-2">
+                      <div className="flex-1 space-y-2 relative">
                         <input
-                          placeholder="Descrição do serviço"
+                          placeholder="Buscar serviço no catálogo..."
                           className={`w-full bg-transparent border-none p-0 text-sm font-medium focus:ring-0 placeholder:text-slate-300 ${showErrors && errors[s.id]?.name ? 'text-red-500' : ''}`}
                           value={s.name}
+                          onFocus={() => setActiveSuggestionIndex({ id: s.id, type: 'service' })}
                           onChange={e => updateService(s.id, 'name', e.target.value)}
                         />
+                        {activeSuggestionIndex?.id === s.id && activeSuggestionIndex.type === 'service' && s.name.length > 1 && (
+                          <div className="absolute left-0 right-0 top-8 z-[60] bg-white dark:bg-surface-dark border dark:border-white/10 rounded-xl shadow-xl max-h-40 overflow-y-auto divide-y dark:divide-white/5">
+                            {catalog
+                              .filter(c => c.name.toLowerCase().includes(s.name.toLowerCase()) || (c.brand && c.brand.toLowerCase().includes(s.name.toLowerCase())))
+                              .map((item, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => selectFromCatalog(s.id, item, 'service')}
+                                  className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 flex justify-between items-center group"
+                                >
+                                  <div className="flex flex-col">
+                                    <span className="font-bold text-slate-700 dark:text-slate-200">{item.name}</span>
+                                    <span className="text-[10px] text-slate-400 group-hover:text-primary transition-colors">{item.brand}</span>
+                                  </div>
+                                  <span className="text-xs font-black text-primary">R$ {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                </button>
+                              ))}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="relative w-32">
@@ -622,16 +650,19 @@ const NewQuoteForm: React.FC = () => {
                               onChange={e => updateMaterial(m.id, 'name', e.target.value)}
                             />
 
-                            {activeSuggestionIndex?.id === m.id && suggestions.length > 0 && (
+                            {activeSuggestionIndex?.id === m.id && activeSuggestionIndex.type === 'material' && suggestions.length > 0 && (
                               <div className="absolute left-0 right-0 top-8 z-[60] bg-white dark:bg-surface-dark border dark:border-white/10 rounded-xl shadow-xl max-h-40 overflow-y-auto divide-y dark:divide-white/5">
                                 {suggestions.map((item, idx) => (
                                   <button
                                     key={idx}
-                                    onClick={() => selectFromCatalog(m.id, item)}
-                                    className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 flex justify-between items-center"
+                                    onClick={() => selectFromCatalog(m.id, item, 'material')}
+                                    className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 flex justify-between items-center group"
                                   >
-                                    <span className="font-medium">{item.name}</span>
-                                    <span className="text-[10px] font-bold text-primary">R$ {item.unitPrice}</span>
+                                    <div className="flex flex-col">
+                                      <span className="font-bold text-slate-700 dark:text-slate-200">{item.name}</span>
+                                      <span className="text-[10px] text-slate-400 group-hover:text-primary transition-colors">{item.brand}</span>
+                                    </div>
+                                    <span className="text-xs font-black text-primary">R$ {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                   </button>
                                 ))}
                               </div>

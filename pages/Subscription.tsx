@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { profileService } from '../services/database';
+import { supabase } from '../lib/supabase';
+import { MaterialItem, UserProfile } from '../types';
 
 const PLANS = [
     {
@@ -98,19 +100,40 @@ const Subscription: React.FC = () => {
     const isExpired = profile?.subscriptionStatus === 'expired' ||
         (profile?.trialEndsAt && new Date(profile.trialEndsAt) < new Date() && profile?.subscriptionStatus !== 'active');
 
-    const handleSubscribe = (plan: typeof PLANS[0]) => {
+    const handleSubscribe = async (plan: typeof PLANS[0]) => {
+        if (!profile?.email || !profile?.id) {
+            toast.error('Complete seu perfil antes de assinar.');
+            return;
+        }
+
         setSelectedPlan(plan.name);
+        setSelectedPlan(plan.name);
+        const loadingToast = toast.loading('Iniciando checkout seguro do InfinitePay...');
         
-        // Simulação de checkout
-        const loadingToast = toast.loading('Iniciando checkout seguro...');
-        
-        setTimeout(() => {
+        try {
+            const { data, error } = await supabase.functions.invoke('infinitepay-checkout', {
+                body: {
+                    planId: plan.id,
+                    userEmail: profile.email,
+                    userId: profile.id,
+                    planName: plan.name,
+                    amount: plan.price
+                }
+            });
+
+            if (error) throw error;
+            if (data?.init_point) {
+                window.location.href = data.init_point;
+            } else {
+                throw new Error('URL de pagamento não gerada');
+            }
+        } catch (e: any) {
+            console.error('Erro no checkout InfinitePay:', e);
+            toast.error(e.message || 'Erro ao iniciar pagamento');
+            setSelectedPlan(null);
+        } finally {
             toast.dismiss(loadingToast);
-            const amount = plan.price;
-            const frequency = plan.name === 'Anual' ? 'ano' : plan.name === 'Semestral' ? 'semestre' : 'mês';
-            
-            navigate(`/payment-success?plan=${encodeURIComponent(plan.name)}&amount=${encodeURIComponent(amount)}&frequency=${encodeURIComponent(frequency)}`);
-        }, 1500);
+        }
     };
 
     if (isLoading) {

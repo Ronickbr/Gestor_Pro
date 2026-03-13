@@ -70,9 +70,9 @@ const Feedback: React.FC = () => {
       setNps(7);
       setGeneral('');
       setImprovements('');
-    } catch (e) {
-      console.error(e);
-      toast.error('Não foi possível enviar seu feedback agora.');
+    } catch (e: any) {
+      console.error('Erro detalhado feedback:', e);
+      toast.error(e.message || 'Não foi possível enviar seu feedback agora.');
     } finally {
       setIsSubmitting(false);
     }

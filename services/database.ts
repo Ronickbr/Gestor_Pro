@@ -482,7 +482,14 @@ export const profileService = {
             ...data,
             companyName: data.company_name, // map snake_case to camelCase
             techSignature: data.tech_signature,
-            materialCatalog: data.material_catalog || [],
+            materialCatalog: (data.material_catalog || []).map((item: any) => ({
+                id: item.id || crypto.randomUUID(),
+                name: item.name || '',
+                brand: item.brand || item.category || 'Geral',
+                unitPrice: Number(item.unitPrice || item.price || 0),
+                quantity: item.quantity || 1,
+                totalPrice: Number(item.totalPrice || item.unitPrice || item.price || 0)
+            })),
             contractTemplates: data.contract_templates || [],
             subscriptionStatus: data.subscription_status,
             trialEndsAt: data.trial_ends_at,

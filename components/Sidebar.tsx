@@ -31,6 +31,7 @@ export const Sidebar: React.FC = () => {
         { path: '/dashboard', label: 'Início', icon: 'dashboard' },
         { path: '/quotes', label: 'Orçamentos', icon: 'request_quote' },
         { path: '/clients', label: 'Clientes', icon: 'group' },
+        { path: '/products', label: 'Catálogo', icon: 'inventory_2' },
         { path: '/contract-templates', label: 'Modelos de Contrato', icon: 'description' },
         { path: '/feedback', label: 'Feedback', icon: 'rate_review' },
         { path: '/settings', label: 'Configurações', icon: 'settings' }

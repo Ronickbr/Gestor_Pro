@@ -3,3 +3,9 @@ dist
 .env.local
 .DS_Store
 .agent
+.vscode
+ARCHITECTURE.md
+erros do console.md
+PROJECT_RULES.md
+REFACTORING_PLAN.md
+SUPABASE_MIGRATION.md

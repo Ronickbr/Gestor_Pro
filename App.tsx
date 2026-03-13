@@ -23,6 +23,7 @@ import Privacy from './pages/Privacy';
 import Contact from './pages/Contact';
 import UpdatePassword from './pages/UpdatePassword';
 import Feedback from './pages/Feedback';
+import Products from './pages/Products';
 import { supabase } from './lib/supabase';
 import { Sidebar } from './components/Sidebar';
 import { Toaster } from 'react-hot-toast';
@@ -192,6 +193,7 @@ const App: React.FC = () => {
             <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
             <Route path="/payment-success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
             <Route path="/feedback" element={<PrivateRoute><Feedback /></PrivateRoute>} />
+            <Route path="/products" element={<PrivateRoute><Products /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppLayout>
