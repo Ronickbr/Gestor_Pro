@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
+import { createHmac } from "node:crypto";
 
 serve(async (req) => {
   const supabase = createClient(
@@ -8,8 +9,34 @@ serve(async (req) => {
   );
 
   try {
-    const payload = await req.json();
-    console.log("InfinitePay Webhook Payload:", payload);
+    // 1. Signature Verification
+    const signature = req.headers.get("x-infinitepay-signature");
+    const webhookSecret = Deno.env.get("INFINITEPAY_WEBHOOK_SECRET");
+
+    if (!webhookSecret) {
+        console.error("INFINITEPAY_WEBHOOK_SECRET not configured");
+        return new Response("Server configuration error", { status: 500 });
+    }
+
+    const rawBody = await req.text();
+    
+    if (!signature) {
+      console.warn("Missing x-infinitepay-signature header");
+      return new Response("Unauthorized: Missing signature", { status: 401 });
+    }
+
+    // Verify HMAC-SHA256
+    const hmac = createHmac("sha256", webhookSecret);
+    const expectedSignature = hmac.update(rawBody).digest("hex");
+
+    if (signature !== expectedSignature) {
+      console.error("Invalid webhook signature detected!");
+      return new Response("Unauthorized: Invalid signature", { status: 401 });
+    }
+
+    // 2. Parse Payload
+    const payload = JSON.parse(rawBody);
+    console.log("InfinitePay Webhook Payload (Verified):", payload);
 
     const { order_nsu, invoice_slug, status } = payload;
 
@@ -26,8 +53,6 @@ serve(async (req) => {
     }
 
     // Update User Profile
-    // We assume if it's in the webhook, we should check status
-    // Common InfinitePay status for success: "paid" or presence of transaction data
     const isPaid = status === "paid" || payload.paid_amount > 0;
 
     if (isPaid) {
@@ -59,7 +84,7 @@ serve(async (req) => {
         user_id: userId,
         event: "payment_success",
         plan: planId,
-        details: { invoice_slug, payload },
+        details: { invoice_slug, payload: { status, order_nsu } }, // Sanitize logged payload
       });
     }
 

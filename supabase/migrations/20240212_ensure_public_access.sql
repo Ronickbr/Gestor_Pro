@@ -61,12 +61,7 @@ BEGIN
     'contractTerms', coalesce(ct.content, q.contract_terms),
     'client', CASE WHEN c.id IS NULL THEN NULL ELSE json_build_object(
       'id', c.id,
-      'name', c.name,
-      'document', c.document,
-      'address', c.address,
-      'phone', c.phone,
-      'email', c.email,
-      'avatar', c.avatar
+      'name', c.name
     ) END
   )
   INTO result

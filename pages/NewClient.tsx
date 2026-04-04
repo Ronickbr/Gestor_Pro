@@ -40,9 +40,13 @@ const NewClient: React.FC = () => {
     const toastId = toast.loading('Enviando imagem...');
 
     try {
+      // Get current user to prepend to path
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado.');
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${formData.id}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const filePath = `${user.id}/${fileName}`;
 
       // Upload
       const { error: uploadError } = await supabase.storage

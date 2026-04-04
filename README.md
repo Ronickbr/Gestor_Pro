@@ -30,6 +30,20 @@ Antes de começar, certifique-se de ter instalado em sua máquina:
 - [Node.js](https://nodejs.org/) (versão 18 ou superior)
 - [NPM](https://www.npmjs.com/)
 
+## 🛡️ Segurança e Auditoria
+
+Recentemente, o projeto passou por uma auditoria completa de segurança (Round 3), com as seguintes implementações:
+
+- **Verificação de Webhook:** Proteção HMAC-SHA256 no endpoint da InfinitePay para prevenir fraudes.
+- **Sanitização de PII:** Funções de banco de dados (RPC) ajustadas para não expor dados sensíveis dos clientes em links públicos.
+- **Harden RLS:** Políticas de Row Level Security que verificam o status da assinatura diretamente no servidor.
+- **Storage Isolado:** Uploads de avatares protegidos por pastas individuais e políticas de propriedade.
+
+### ⚙️ Configuração Adicional
+Para o funcionamento total das defesas:
+1. Configure `INFINITEPAY_WEBHOOK_SECRET` no Supabase Edge Functions.
+2. Certifique-se de usar a `VITE_SUPABASE_ANON_KEY` (Chave Anon) no frontend e **NUNCA** a chave de serviço.
+
 ## 📦 Instalação e Configuração
 
 1. **Clone o repositório:**

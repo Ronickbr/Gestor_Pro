@@ -172,7 +172,7 @@ BEGIN
   FROM (
     SELECT 
       q.*, 
-      row_to_json(c.*) as client,
+      json_build_object('id', c.id, 'name', c.name) as client,
       coalesce(ct.content, q.contract_terms) as contract_content_resolved
     FROM quotes q
     LEFT JOIN clients c ON q.client_id = c.id
