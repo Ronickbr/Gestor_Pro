@@ -247,12 +247,12 @@ const Dashboard: React.FC = () => {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Revenue */}
-        <div className="bg-white dark:bg-surface-dark p-5 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 flex flex-col justify-between h-32">
+        <div className="glass-card p-5 flex flex-col justify-between h-32 hover-lift">
           <div className="flex justify-between items-start">
             <div className="p-2 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg text-emerald-600">
               <span className="material-symbols-outlined">payments</span>
             </div>
-            <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-wide">
+            <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 uppercase tracking-wide">
               Total
             </span>
           </div>
@@ -263,7 +263,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Monthly Revenue */}
-        <div className="bg-white dark:bg-surface-dark p-5 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 flex flex-col justify-between h-32">
+        <div className="glass-card p-5 flex flex-col justify-between h-32 hover-lift">
           <div className="flex justify-between items-start">
             <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-lg text-blue-600">
               <span className="material-symbols-outlined">calendar_month</span>
@@ -279,7 +279,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Active Contracts */}
-        <div className="bg-white dark:bg-surface-dark p-5 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 flex flex-col justify-between h-32">
+        <div className="glass-card p-5 flex flex-col justify-between h-32 hover-lift">
           <div className="flex justify-between items-start">
             <div className="p-2 bg-purple-100 dark:bg-purple-500/20 rounded-lg text-purple-600">
               <span className="material-symbols-outlined">verified</span>
@@ -295,7 +295,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Pending */}
-        <div className="bg-white dark:bg-surface-dark p-5 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 flex flex-col justify-between h-32">
+        <div className="glass-card p-5 flex flex-col justify-between h-32 hover-lift">
           <div className="flex justify-between items-start">
             <div className="p-2 bg-orange-100 dark:bg-orange-500/20 rounded-lg text-orange-600">
               <span className="material-symbols-outlined">pending_actions</span>
@@ -315,10 +315,10 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Revenue Chart */}
-        <div className="md:col-span-2 bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10">
+        <div className="md:col-span-2 glass-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-slate-900 dark:text-white">Receita últimos 6 meses</h3>
-            <span className="text-xs text-slate-500 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+            <span className="text-xs text-slate-500 font-medium bg-slate-100 dark:bg-white/5 px-2 py-1 rounded-full">
               Confirmados
             </span>
           </div>
@@ -326,9 +326,9 @@ const Dashboard: React.FC = () => {
           <div className="flex items-end justify-between h-40 gap-2 mt-4">
             {monthlyRevenueData.map((data, idx) => (
               <div key={idx} className="flex flex-col items-center gap-2 flex-1 h-full group">
-                <div className="w-full relative flex items-end justify-center flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-t-lg">
+                <div className="w-full relative flex items-end justify-center flex-1 bg-slate-100/50 dark:bg-white/5 rounded-t-lg">
                   <div 
-                    className="w-full bg-primary/80 group-hover:bg-primary transition-all duration-500 rounded-t-sm relative"
+                    className="w-full bg-primary group-hover:bg-primary-dark transition-all duration-500 rounded-t-sm relative shadow-lg shadow-primary/20"
                     style={{ height: `${data.height}%` }}
                   >
                     {data.value > 0 && (
@@ -345,14 +345,14 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Top Clients */}
-        <div className="md:col-span-1 bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10">
+        <div className="md:col-span-1 glass-card p-6">
           <h3 className="font-bold text-slate-900 dark:text-white mb-4">Top Clientes</h3>
           <div className="space-y-4">
             {topClients.length > 0 ? topClients.map((client, idx) => (
-              <div key={idx} className="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
+              <div key={idx} className="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-white/5 last:border-0 last:pb-0">
                 <div className={`size-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                  idx === 0 ? 'bg-yellow-100 text-yellow-700' :
-                  idx === 1 ? 'bg-slate-200 text-slate-600' :
+                  idx === 0 ? 'bg-amber-100 text-amber-700' :
+                  idx === 1 ? 'bg-slate-100 text-slate-600' :
                   'bg-orange-100 text-orange-700'
                 }`}>
                   {idx + 1}
@@ -426,13 +426,13 @@ const Dashboard: React.FC = () => {
             <div
               key={quote.id}
               onClick={() => navigate(`/quote/${quote.id}`)}
-              className="flex items-center justify-between bg-white dark:bg-surface-dark p-3 rounded-xl shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 cursor-pointer active:scale-[0.98] transition-transform hover:shadow-md"
+              className="flex items-center justify-between glass-card p-4 cursor-pointer hover-lift rounded-xl"
             >
               <div className="flex items-center gap-3">
                 <div className={`flex size-10 items-center justify-center rounded-full ${
                   quote.status === QuoteStatus.COMPLETED ? 'bg-emerald-100 text-emerald-600' : 
                   quote.status === QuoteStatus.APPROVED ? 'bg-blue-100 text-blue-600' :
-                  'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                  'bg-slate-100 dark:bg-white/5 text-slate-500'
                 }`}>
                   <span className="material-symbols-outlined">
                     {quote.status === QuoteStatus.COMPLETED ? 'verified' : 
@@ -458,14 +458,14 @@ const Dashboard: React.FC = () => {
                 }`}>
                   {QuoteStatusLabels[quote.status] || quote.status}
                 </span>
-                <span className="text-[10px] font-medium text-slate-400">
+                <span className="text-[10px] font-bold text-slate-900 dark:text-white">
                   R$ {((quote.services?.reduce((s, i) => s + i.price, 0) || 0) + (quote.materials?.reduce((m, i) => m + i.totalPrice, 0) || 0)).toLocaleString('pt-BR')}
                 </span>
               </div>
             </div>
           ))}
           {quotes.length === 0 && (
-            <div className="text-center py-10 bg-white dark:bg-surface-dark rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
+            <div className="text-center py-10 glass-card border-dashed border-slate-300">
               <p className="text-slate-500 text-sm">Nenhum orçamento criado ainda.</p>
               <button 
                 onClick={() => navigate('/new-quote')}
@@ -493,13 +493,13 @@ interface QuickActionProps {
 const QuickAction: React.FC<QuickActionProps> = ({ icon, label, color, bgColor, onClick }) => (
   <button
     onClick={onClick}
-    className="group relative flex flex-col items-start justify-between gap-3 rounded-xl p-4 bg-white dark:bg-surface-dark shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 active:scale-[0.98] transition-all overflow-hidden h-32 hover:shadow-md"
+    className="group relative flex flex-col items-start justify-between gap-3 p-4 glass-card hover-lift overflow-hidden h-32"
   >
-    <div className={`z-10 flex size-10 items-center justify-center rounded-lg ${bgColor} ${color}`}>
+    <div className={`z-10 flex size-10 items-center justify-center rounded-lg ${bgColor} ${color} shadow-sm group-hover:scale-110 transition-transform`}>
       <span className="material-symbols-outlined">{icon}</span>
     </div>
     <p className="z-10 text-left text-sm font-bold leading-tight text-slate-900 dark:text-white">{label}</p>
-    <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-slate-500/5 group-hover:bg-primary/5 transition-colors"></div>
+    <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-slate-500/5 group-hover:bg-primary/10 transition-colors"></div>
   </button>
 );
 

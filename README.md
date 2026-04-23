@@ -16,13 +16,13 @@ O **Gestor de Serviços Pro** é uma aplicação web completa desenvolvida para 
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Frontend:** [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Build Tool:** [Vite](https://vitejs.dev/)
-- **Estilização:** [Tailwind CSS](https://tailwindcss.com/)
+- **Frontend:** [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool:** [Vite 6](https://vitejs.dev/)
+- **Estilização:** [Tailwind CSS v4](https://tailwindcss.com/) (Design Premium com Glassmorphism)
 - **Backend & Banco de Dados:** [Supabase](https://supabase.com/) (PostgreSQL + Auth)
-- **Gerenciamento de Estado:** [TanStack Query](https://tanstack.com/query/latest)
-- **Roteamento:** [React Router](https://reactrouter.com/)
-- **Ícones:** Material Symbols
+- **Gerenciamento de Estado:** [TanStack Query v5](https://tanstack.com/query/latest) (React Query)
+- **Roteamento:** [React Router v7](https://reactrouter.com/)
+- **Ícones:** Material Symbols (Customizados)
 
 ## ⚙️ Pré-requisitos
 
