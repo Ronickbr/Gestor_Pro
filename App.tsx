@@ -175,7 +175,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/v/:token" element={<PublicQuoteView />} />
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<Login />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/quotes" element={<PrivateRoute><QuotesList /></PrivateRoute>} />
             <Route path="/clients" element={<PrivateRoute><ClientsList /></PrivateRoute>} />
