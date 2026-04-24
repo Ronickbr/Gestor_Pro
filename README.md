@@ -32,13 +32,18 @@ Antes de começar, certifique-se de ter instalado em sua máquina:
 
 ## 🛡️ Segurança e Auditoria
 
-Recentemente, o projeto passou por uma auditoria completa de segurança (Round 3), com as seguintes implementações:
+Recentemente, o projeto passou por uma auditoria completa de segurança e refatoração arquitetural (Versões 1.7.x):
 
+- **v1.7.3 (Atual):** Estabilização final das rotinas de serviço e sincronização de documentação.
+- **v1.7.2:** Correção de tipos TypeScript e restauração de imports após modularização.
+- **v1.7.1:** Refatoração modular e hardening de segurança (RPC Security Definer).
+- **v1.7.0:** Implementação de proteção HMAC-SHA256 para webhooks e sanitização de PII.
+
+### 🛠️ Implementações Técnicas Recentes
 - **Verificação de Webhook:** Proteção HMAC-SHA256 no endpoint da InfinitePay para prevenir fraudes.
 - **Sanitização de PII:** Funções de banco de dados (RPC) ajustadas para não expor dados sensíveis dos clientes em links públicos.
 - **Harden RLS:** Políticas de Row Level Security que verificam o status da assinatura diretamente no servidor.
 - **Storage Isolado:** Uploads de avatares protegidos por pastas individuais e políticas de propriedade.
-- **Otimização Tailwind CSS v4:** Configuração refinada para suporte nativo e eliminação de avisos de build.
 - **Refatoração Modular:** Migração de lógica monolítica de banco de dados para serviços especializados (`quotes`, `clients`, `profile`).
 
 ### ⚙️ Configuração Adicional
