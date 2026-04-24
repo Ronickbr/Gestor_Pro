@@ -4,10 +4,8 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Quote, QuoteStatus, ServiceItem, MaterialItem, Client } from '../types';
 import toast from 'react-hot-toast';
 
-import { profileService } from '../services/database';
+import { quotesService, clientsService, profileService } from '../services/database';
 import { generateContractText } from '../services/contractGenerator';
-
-import { quotesService } from '../services/database';
 
 interface ValidationError {
   [key: string]: {
@@ -51,7 +49,7 @@ const NewQuoteForm: React.FC = () => {
   const loadInitialData = async () => {
     try {
       // Load clients
-      const fetchedClients = await quotesService.fetchClients();
+      const fetchedClients = await clientsService.fetchClients();
       if (fetchedClients.length > 0) {
         setStoredClients(fetchedClients);
         // Default to first client if none selected and not editing

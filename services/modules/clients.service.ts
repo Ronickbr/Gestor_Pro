@@ -17,6 +17,21 @@ export const clientsModule = {
         return data as Client[];
     },
 
+    async getClient(id: string) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Usuário não autenticado');
+
+        const { data, error } = await supabase
+            .from('clients')
+            .select('*')
+            .eq('id', id)
+            .eq('user_id', user.id)
+            .single();
+
+        if (error) throw error;
+        return data as Client;
+    },
+
     async createClient(client: Omit<Client, 'id'>) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Usuário não autenticado');

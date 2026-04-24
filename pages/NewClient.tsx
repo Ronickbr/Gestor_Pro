@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Client } from '../types';
-import { quotesService } from '../services/database';
+import { quotesService, clientsService } from '../services/database';
 import { supabase } from '../lib/supabase';
 import { Avatar } from '../components/ui/Avatar';
 
@@ -72,7 +72,7 @@ const NewClient: React.FC = () => {
     const loadClient = async () => {
       if (id) {
         try {
-          const clientData = await quotesService.getClient(id);
+          const clientData = await clientsService.getClient(id);
           setFormData(clientData);
         } catch (error) {
           console.error('Erro ao carregar cliente:', error);
@@ -93,11 +93,11 @@ const NewClient: React.FC = () => {
     try {
       if (id) {
         // Update
-        await quotesService.updateClient(formData);
+        await clientsService.updateClient(formData);
         toast.success('Cliente atualizado com sucesso!');
       } else {
         // Create
-        await quotesService.createClient({
+        await clientsService.createClient({
           name: formData.name,
           email: formData.email,
           phone: formData.phone,

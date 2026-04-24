@@ -51,6 +51,14 @@ export const quotesService = {
     async markAsViewed(id: string) {
         const { error } = await supabase.rpc('mark_quote_viewed', { quote_id_input: id });
         if (error) console.error('Error marking as viewed:', error);
+    },
+
+    async publicUpdateStatus(id: string, status: QuoteStatus) {
+        const { error } = await supabase
+            .from('quotes')
+            .update({ status })
+            .eq('id', id);
+        if (error) throw error;
     }
 };
 

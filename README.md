@@ -18,7 +18,7 @@ O **Gestor de Serviços Pro** é uma aplicação web completa desenvolvida para 
 
 - **Frontend:** [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - **Build Tool:** [Vite 6](https://vitejs.dev/)
-- **Estilização:** [Tailwind CSS v4](https://tailwindcss.com/) (Design Premium com Glassmorphism)
+- **Estilização:** [Tailwind CSS v4](https://tailwindcss.com/) (Arquitetura moderna com discovery automático e design Premium)
 - **Backend & Banco de Dados:** [Supabase](https://supabase.com/) (PostgreSQL + Auth)
 - **Gerenciamento de Estado:** [TanStack Query v5](https://tanstack.com/query/latest) (React Query)
 - **Roteamento:** [React Router v7](https://reactrouter.com/)
@@ -38,6 +38,8 @@ Recentemente, o projeto passou por uma auditoria completa de segurança (Round 3
 - **Sanitização de PII:** Funções de banco de dados (RPC) ajustadas para não expor dados sensíveis dos clientes em links públicos.
 - **Harden RLS:** Políticas de Row Level Security que verificam o status da assinatura diretamente no servidor.
 - **Storage Isolado:** Uploads de avatares protegidos por pastas individuais e políticas de propriedade.
+- **Otimização Tailwind CSS v4:** Configuração refinada para suporte nativo e eliminação de avisos de build.
+- **Refatoração Modular:** Migração de lógica monolítica de banco de dados para serviços especializados (`quotes`, `clients`, `profile`).
 
 ### ⚙️ Configuração Adicional
 Para o funcionamento total das defesas:

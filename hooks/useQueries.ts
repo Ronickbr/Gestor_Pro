@@ -1,6 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { quotesService, profileService } from '../services/database';
+import { quotesService, clientsService, profileService } from '../services/database';
 import { Quote, QuoteStatus, QuoteStatusLabels, Client } from '../types';
 import toast from 'react-hot-toast';
 
@@ -90,14 +90,14 @@ export function useDeleteQuote() {
 export function useClients() {
   return useQuery({
     queryKey: ['clients'],
-    queryFn: () => quotesService.fetchClients(),
+    queryFn: () => clientsService.fetchClients(),
   });
 }
 
 export function useClient(id: string) {
   return useQuery({
     queryKey: ['client', id],
-    queryFn: () => quotesService.getClient(id),
+    queryFn: () => clientsService.getClient(id),
     enabled: !!id,
   });
 }
@@ -105,7 +105,7 @@ export function useClient(id: string) {
 export function useCreateClient() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (client: Omit<Client, 'id'>) => quotesService.createClient(client),
+    mutationFn: (client: Omit<Client, 'id'>) => clientsService.createClient(client),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       toast.success('Cliente cadastrado!');
@@ -116,7 +116,7 @@ export function useCreateClient() {
 export function useUpdateClient() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (client: Client) => quotesService.updateClient(client),
+    mutationFn: (client: Client) => clientsService.updateClient(client),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       queryClient.invalidateQueries({ queryKey: ['client', variables.id] });

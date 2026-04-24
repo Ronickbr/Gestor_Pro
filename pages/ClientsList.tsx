@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Client } from '../types';
-import { quotesService } from '../services/database';
+import { quotesService, clientsService } from '../services/database';
 import { Avatar } from '../components/ui/Avatar';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 
@@ -19,7 +19,7 @@ const ClientsList: React.FC = () => {
 
   const loadClients = async () => {
     try {
-      const data = await quotesService.fetchClients();
+      const data = await clientsService.fetchClients();
       setClients(data);
     } catch (error) {
       console.error(error);
@@ -32,7 +32,7 @@ const ClientsList: React.FC = () => {
     if (!clientToDelete) return;
 
     try {
-      await quotesService.deleteClient(clientToDelete);
+      await clientsService.deleteClient(clientToDelete);
       await loadClients();
     } catch (error) {
       console.error('Erro ao deletar cliente:', error);
