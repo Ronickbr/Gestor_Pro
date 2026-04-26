@@ -8,6 +8,7 @@ import { DialogProvider } from './contexts/DialogContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from './hooks/useAuth';
 import { BOTTOM_NAV_ITEMS, isFullWidthRoute, shouldHideNav } from './lib/navigation';
+import { PwaUpdatePrompt } from './components/PwaUpdatePrompt';
 
 // Lazy loading pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -119,6 +120,19 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  React.useEffect(() => {
+    const w = window as any;
+    const iOSStandalone = typeof w.navigator?.standalone === 'boolean' ? w.navigator.standalone : false;
+    const displayStandalone = window.matchMedia?.('(display-mode: standalone)').matches ?? false;
+    const displayFullscreen = window.matchMedia?.('(display-mode: fullscreen)').matches ?? false;
+    const displayMinimal = window.matchMedia?.('(display-mode: minimal-ui)').matches ?? false;
+    const isStandalone = Boolean(iOSStandalone || displayStandalone || displayFullscreen || displayMinimal);
+
+    if (isStandalone && (location.pathname === '/' || location.pathname === '/landing')) {
+      navigate('/login', { replace: true });
+    }
+  }, [location.pathname, navigate]);
   const isFullWidth = location.pathname === '/' || isFullWidthRoute(location.pathname);
 
   return (
@@ -126,6 +140,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {!isFullWidth && <Sidebar />}
       <div className={`flex-1 w-full transition-all duration-300 ${!isFullWidth ? 'md:pl-64 pb-20 md:pb-0' : ''}`}>
         {children}
+        <PwaUpdatePrompt />
         {!isFullWidth && <ConditionalBottomNav />}
       </div>
     </div>
@@ -147,7 +162,7 @@ const App: React.FC = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/update-password" element={<UpdatePassword />} />
                 <Route path="/v/:token" element={<PublicQuoteView />} />
-                <Route path="/" element={<Login />} />
+                <Route path="/" element={<Navigate to="/landing" replace />} />
                 <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                 <Route path="/quotes" element={<PrivateRoute><QuotesList /></PrivateRoute>} />
                 <Route path="/clients" element={<PrivateRoute><ClientsList /></PrivateRoute>} />

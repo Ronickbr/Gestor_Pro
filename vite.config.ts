@@ -16,7 +16,8 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
+        injectRegister: null,
         includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
         manifest: {
           name: 'Gestor de Serviços Pro',
@@ -26,7 +27,7 @@ export default defineConfig(({ mode }) => {
           background_color: '#101922',
           display: 'standalone',
           display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
-          start_url: '/',
+          start_url: '/#/login',
           orientation: 'portrait',
           id: '/',
           categories: ['productivity', 'business', 'utilities'],
@@ -58,7 +59,7 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           cleanupOutdatedCaches: true,
-          skipWaiting: true,
+          skipWaiting: false,
           clientsClaim: true,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2}']
         }
