@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
@@ -9,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from './hooks/useAuth';
 import { BOTTOM_NAV_ITEMS, isFullWidthRoute, shouldHideNav } from './lib/navigation';
 import { PwaUpdatePrompt } from './components/PwaUpdatePrompt';
+import { PwaInstallBanner } from './components/PwaInstallBanner';
 
 // Lazy loading pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -141,6 +141,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <div className={`flex-1 w-full transition-all duration-300 ${!isFullWidth ? 'md:pl-64 pb-20 md:pb-0' : ''}`}>
         {children}
         <PwaUpdatePrompt />
+        <PwaInstallBanner />
         {!isFullWidth && <ConditionalBottomNav />}
       </div>
     </div>

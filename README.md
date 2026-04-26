@@ -34,7 +34,8 @@ Antes de começar, certifique-se de ter instalado em sua máquina:
 
 Recentemente, o projeto passou por uma auditoria completa de segurança e refatoração arquitetural (Versões 1.7.x):
 
-- **v1.7.5 (Atual):** Auditoria de segurança contra IDOR, reforço de ownership em escrita e correção de lógica 'fail-open' na autenticação.
+- **v1.7.6 (Atual):** Implementação de suporte global PWA com instruções personalizadas para iOS e banner de instalação dinâmico.
+- **v1.7.5:** Auditoria de segurança e correção de vulnerabilidades (IDOR, Bypass de Assinatura).
 - **v1.7.4:** Refatoração de autenticação (`useAuth`), implementação de Lazy Loading e polimento visual Premium (Antigravity Design).
 - **v1.7.3:** Estabilização final das rotinas de serviço e sincronização de documentação.
 - **v1.7.2:** Correção de tipos TypeScript e restauração de imports após modularização.

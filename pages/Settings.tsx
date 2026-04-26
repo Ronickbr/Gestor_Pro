@@ -10,6 +10,7 @@ import { Button } from '../components/ui/Button';
 import { Field } from '../components/ui/Field';
 import { Input as TextInput } from '../components/ui/Input';
 import { InlineAlert } from '../components/ui/InlineAlert';
+import { usePwaInstall } from '../hooks/usePwaInstall';
 
 interface UserProfile {
   name: string;
@@ -47,24 +48,19 @@ const Settings: React.FC = () => {
   const [apiKey, setApiKey] = useState(getGeminiApiKey() || '');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [initialSnapshot, setInitialSnapshot] = useState<string | null>(null);
+  const { isInstallable, isStandalone, isIos, showInstallPrompt } = usePwaInstall();
 
   useEffect(() => {
     loadProfile();
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    });
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null);
+    if (isIos) {
+       toast('Para instalar no iPhone, use a opção "Adicionar à Tela de Início" no Safari.', { icon: 'ℹ️' });
+       return;
     }
+    await showInstallPrompt();
   };
 
   useEffect(() => {
@@ -529,14 +525,14 @@ const Settings: React.FC = () => {
                 </div>
 
                  {/* Install App */}
-                {deferredPrompt && (
+                {!isStandalone && (isInstallable || isIos) && (
                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg shadow-blue-500/20 text-white flex items-center gap-4 cursor-pointer hover:scale-[1.02] transition-transform" onClick={handleInstallClick}>
                     <div className="size-12 bg-white/20 rounded-xl flex items-center justify-center">
                       <span className="material-symbols-outlined text-2xl">download</span>
                     </div>
                     <div>
                       <h3 className="font-bold text-lg">Instalar Aplicativo</h3>
-                      <p className="text-sm opacity-90">Adicione à tela inicial para acesso rápido</p>
+                      <p className="text-sm opacity-90">{isIos ? 'Saiba como instalar no seu iPhone' : 'Adicione à tela inicial para acesso rápido'}</p>
                     </div>
                    </div>
                 )}

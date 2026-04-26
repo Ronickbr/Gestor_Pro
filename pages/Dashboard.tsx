@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Quote, QuoteStatus, QuoteStatusLabels, UserProfile } from '../types';
 import { profileService, quotesService } from '../services/database';
+import { usePwaInstall } from '../hooks/usePwaInstall';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -203,6 +204,25 @@ const Dashboard: React.FC = () => {
           <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">settings</span>
         </button>
       </div>
+
+      {/* Card de Instalação PWA (Mobile Only) */}
+      {!usePwaInstall().isStandalone && (usePwaInstall().isInstallable || usePwaInstall().isIos) && (
+        <div className="md:hidden block animate-in slide-in-from-top-4 duration-500">
+           <div 
+             onClick={usePwaInstall().isIos ? () => {} : usePwaInstall().showInstallPrompt}
+             className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center gap-4 active:scale-[0.98] transition-all"
+           >
+             <div className="size-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+               <span className="material-symbols-outlined text-2xl">install_mobile</span>
+             </div>
+             <div className="flex-1">
+               <h4 className="text-sm font-bold text-slate-900 dark:text-white">Instalar App</h4>
+               <p className="text-[11px] text-slate-500 dark:text-slate-400">Toque aqui para instalar o Gestor Pro no seu celular.</p>
+             </div>
+             <span className="material-symbols-outlined text-primary">chevron_right</span>
+           </div>
+        </div>
+      )}
 
       {/* Alerta de Garantias Expirando */}
       {expiringWarranties.length > 0 && (
