@@ -53,7 +53,7 @@ export function useAuth() {
       setStatus('authenticated');
     } catch (e) {
       console.error("Subscription check failed", e);
-      setStatus('authenticated'); // Fallback to authenticated if check fails
+      setStatus('unauthenticated'); // Mais seguro: desloga em caso de erro crítico de verificação
     }
   };
 

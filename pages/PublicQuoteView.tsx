@@ -30,6 +30,11 @@ const PublicQuoteView: React.FC = () => {
                 const access = await quotesService.checkPublicQuoteAccess(token);
                 
                 if (!access.exists) {
+                    if (access.reason === 'PUBLIC_VIEW_NOT_CONFIGURED') {
+                        setError('Visualização pública não está configurada no servidor.');
+                        setIsLoading(false);
+                        return;
+                    }
                     setError('Orçamento não encontrado ou expirado.');
                     setIsLoading(false);
                     return;
@@ -55,6 +60,14 @@ const PublicQuoteView: React.FC = () => {
         if (!token) return;
         try {
             const data = await quotesService.getQuoteByToken(token, password);
+            if (!data) {
+                if (password) {
+                    setPasswordError('Senha incorreta.');
+                } else {
+                    setError('Orçamento não encontrado ou expirado.');
+                }
+                return;
+            }
             setQuote(data);
             setRequiresPassword(false); // Success
             
@@ -67,7 +80,6 @@ const PublicQuoteView: React.FC = () => {
             } else {
                 setError('Orçamento não encontrado ou expirado.');
             }
-            throw err;
         } finally {
             setIsLoading(false);
         }
@@ -82,8 +94,6 @@ const PublicQuoteView: React.FC = () => {
         
         try {
             await loadQuoteData(passwordInput);
-        } catch (e) {
-            // Error handled in loadQuoteData
         } finally {
             setIsVerifying(false);
         }

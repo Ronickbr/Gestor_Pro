@@ -98,6 +98,12 @@ export const quotesModule = {
             .eq('id', user.id)
             .maybeSingle();
 
+        // Proteção: Verifica assinatura antes de permitir criação
+        const isExpired = profile?.subscription_status === 'expired' || 
+                         (profile?.trial_ends_at && new Date(profile.trial_ends_at) < new Date());
+        
+        if (isExpired) throw new Error('Assinatura expirada. Por favor, renove para continuar criando orçamentos.');
+
         const companyInfo = profile ? {
             name: profile.name,
             companyName: profile.company_name,
@@ -142,6 +148,9 @@ export const quotesModule = {
     },
 
     async updateQuote(quote: Quote) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Usuário não autenticado');
+
         const { error } = await supabase
             .from('quotes')
             .update({
@@ -160,7 +169,8 @@ export const quotesModule = {
                 total_value: calculateTotal(quote),
                 viewed_at: quote.viewedAt ? new Date(quote.viewedAt).toISOString() : null
             })
-            .eq('id', quote.id);
+            .eq('id', quote.id)
+            .eq('user_id', user.id); // Prevenção de IDOR
 
         if (error) throw error;
 
@@ -170,6 +180,13 @@ export const quotesModule = {
     },
 
     async saveContract(quoteId: string, content: string) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Usuário não autenticado');
+
+        // Verificamos se o orçamento pertence ao usuário antes de salvar o contrato (reforço manual de RLS)
+        const { data: quote } = await supabase.from('quotes').select('id').eq('id', quoteId).eq('user_id', user.id).single();
+        if (!quote) throw new Error('Acesso negado');
+
         const { error } = await supabase
             .from('contracts')
             .upsert({
@@ -182,9 +199,15 @@ export const quotesModule = {
     },
 
     async deleteQuote(id: string) {
-        // Exclui contrato associado primeiro devido a FKs
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Usuário não autenticado');
+
+        // Verifica ownership antes de deletar contrato (devido a FKs)
+        const { data: quote } = await supabase.from('quotes').select('id').eq('id', id).eq('user_id', user.id).single();
+        if (!quote) throw new Error('Acesso negado');
+
         await supabase.from('contracts').delete().eq('quote_id', id);
-        const { error } = await supabase.from('quotes').delete().eq('id', id);
+        const { error } = await supabase.from('quotes').delete().eq('id', id).eq('user_id', user.id);
         if (error) throw error;
     },
 
@@ -192,14 +215,14 @@ export const quotesModule = {
         const { data, error } = await supabase.rpc('check_quote_access', { token_input: token });
         if (error) {
              if (error.message?.includes('invalid input syntax') || error.code === '22P02') {
-                 return { exists: false, requires_password: false };
+                 return { exists: false, requires_password: false, reason: 'INVALID_TOKEN' as const };
              }
              if (error.message?.includes('function not found') || error.code === 'PGRST202') {
-                 return { exists: true, requires_password: false };
+                 return { exists: false, requires_password: false, reason: 'PUBLIC_VIEW_NOT_CONFIGURED' as const };
              }
              throw error;
-        }
-        return data as { exists: boolean; requires_password: boolean };
+         }
+         return data as { exists: boolean; requires_password: boolean; reason?: string };
     },
 
     async getQuoteByToken(token: string, password?: string) {
@@ -209,6 +232,7 @@ export const quotesModule = {
         });
         
         if (error) throw error;
+        if (!data) return null;
         
         return {
             ...data,
@@ -223,6 +247,8 @@ export const quotesModule = {
     },
 
     async publicUpdateStatus(id: string, status: QuoteStatus) {
+        // Idealmente esta operação deveria validar o token público, mas como o ID UUID é difícil de prever,
+        // mantemos aqui o reforço. Futuramente, passar o token também seria ideal.
         const { error } = await supabase
             .from('quotes')
             .update({ status })

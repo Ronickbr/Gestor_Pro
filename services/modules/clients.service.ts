@@ -36,6 +36,13 @@ export const clientsModule = {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Usuário não autenticado');
 
+        // Proteção extra: Verifica assinatura antes de criar
+        const { data: profile } = await supabase.from('profiles').select('subscription_status, trial_ends_at').eq('id', user.id).single();
+        const isExpired = profile?.subscription_status === 'expired' || 
+                         (profile?.trial_ends_at && new Date(profile.trial_ends_at) < new Date());
+        
+        if (isExpired) throw new Error('Assinatura expirada. Por favor, renove para continuar criando clientes.');
+
         const { data, error } = await supabase
             .from('clients')
             .insert({
@@ -55,6 +62,9 @@ export const clientsModule = {
     },
 
     async updateClient(client: Client) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Usuário não autenticado');
+
         const { error } = await supabase
             .from('clients')
             .update({
@@ -64,16 +74,21 @@ export const clientsModule = {
                 address: client.address,
                 document: client.document
             })
-            .eq('id', client.id);
+            .eq('id', client.id)
+            .eq('user_id', user.id); // Prevenção de IDOR
 
         if (error) throw error;
     },
 
     async deleteClient(id: string) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Usuário não autenticado');
+
         const { error } = await supabase
             .from('clients')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .eq('user_id', user.id); // Prevenção de IDOR
 
         if (error) throw error;
     }

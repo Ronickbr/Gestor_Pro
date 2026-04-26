@@ -34,7 +34,8 @@ Antes de começar, certifique-se de ter instalado em sua máquina:
 
 Recentemente, o projeto passou por uma auditoria completa de segurança e refatoração arquitetural (Versões 1.7.x):
 
-- **v1.7.4 (Atual):** Refatoração de autenticação (`useAuth`), implementação de Lazy Loading e polimento visual Premium (Antigravity Design).
+- **v1.7.5 (Atual):** Auditoria de segurança contra IDOR, reforço de ownership em escrita e correção de lógica 'fail-open' na autenticação.
+- **v1.7.4:** Refatoração de autenticação (`useAuth`), implementação de Lazy Loading e polimento visual Premium (Antigravity Design).
 - **v1.7.3:** Estabilização final das rotinas de serviço e sincronização de documentação.
 - **v1.7.2:** Correção de tipos TypeScript e restauração de imports após modularização.
 - **v1.7.1:** Refatoração modular e hardening de segurança (RPC Security Definer).
