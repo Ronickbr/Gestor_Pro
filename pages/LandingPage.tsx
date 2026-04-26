@@ -16,6 +16,22 @@ const LandingPage: React.FC = () => {
         checkSession();
     }, [navigate]);
 
+    useEffect(() => {
+        if (!isMobileMenuOpen) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsMobileMenuOpen(false);
+        };
+        window.addEventListener('keydown', onKeyDown);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            window.removeEventListener('keydown', onKeyDown);
+        };
+    }, [isMobileMenuOpen]);
+
     const scrollToSection = (id: string) => {
         const element = document.getElementById(id);
         if (element) {
@@ -30,7 +46,7 @@ const LandingPage: React.FC = () => {
             <nav className="fixed top-0 w-full z-50 bg-slate-900/80 backdrop-blur-md border-b border-white/5">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <img src="https://i.imgur.com/6i2hhmf.png" className="size-10 object-contain rounded-xl shadow-lg shadow-primary/20" alt="Logo" />
+                        <img src="/pwa-icon.svg" className="size-10 object-contain rounded-xl shadow-lg shadow-primary/20" alt="Logo" />
                         <span className="font-black text-xl tracking-tight">Gestor<span className="text-primary">Pro</span></span>
                     </div>
 
@@ -62,6 +78,8 @@ const LandingPage: React.FC = () => {
                         className="md:hidden p-2 text-white active:scale-95 transition-transform"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         aria-label="Menu"
+                        aria-expanded={isMobileMenuOpen}
+                        aria-controls="mobile-menu"
                     >
                         <span className="material-symbols-outlined text-3xl">
                             {isMobileMenuOpen ? 'close' : 'menu'}
@@ -71,7 +89,12 @@ const LandingPage: React.FC = () => {
 
                 {/* Mobile Menu Overlay */}
                 {isMobileMenuOpen && (
-                    <div className="fixed inset-0 top-20 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-white/5 md:hidden animate-in slide-in-from-top-5 duration-200 flex flex-col p-6 gap-6 h-[calc(100vh-80px)] overflow-y-auto">
+                    <div
+                        id="mobile-menu"
+                        role="dialog"
+                        aria-modal="true"
+                        className="fixed inset-0 top-20 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-white/5 md:hidden animate-in slide-in-from-top-5 duration-200 flex flex-col p-6 gap-6 h-[calc(100vh-80px)] overflow-y-auto"
+                    >
                         <div className="flex flex-col gap-2 text-lg font-medium text-slate-300">
                             <button onClick={() => scrollToSection('features')} className="text-left hover:text-white py-4 border-b border-white/5 flex items-center justify-between group">
                                 Funcionalidades
@@ -135,6 +158,41 @@ const LandingPage: React.FC = () => {
                         >
                             <span className="material-symbols-outlined">play_circle</span> Ver Demonstração
                         </button>
+                    </div>
+                </div>
+            </section>
+
+            <section className="relative px-6 pb-10 md:pb-14">
+                <div className="max-w-5xl mx-auto">
+                    <div className="grid md:grid-cols-3 gap-4">
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="material-symbols-outlined text-primary">verified</span>
+                                <div className="font-bold">Aparência profissional</div>
+                            </div>
+                            <p className="text-sm text-slate-400">Orçamentos e contratos com layout limpo, direto e pronto para WhatsApp.</p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="material-symbols-outlined text-emerald-400">bolt</span>
+                                <div className="font-bold">Feito para o dia a dia</div>
+                            </div>
+                            <p className="text-sm text-slate-400">Fluxo rápido: criar, enviar, coletar assinatura e acompanhar recebimento.</p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="material-symbols-outlined text-purple-400">lock</span>
+                                <div className="font-bold">Confiança e segurança</div>
+                            </div>
+                            <p className="text-sm text-slate-400">Dados organizados e centralizados para você trabalhar com tranquilidade.</p>
+                        </div>
+                    </div>
+                    <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-400">
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">Elétricas</span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">Hidráulica</span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">TI</span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">Reparos</span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">Serviços em geral</span>
                     </div>
                 </div>
             </section>
@@ -275,6 +333,46 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
+            <section className="py-16 md:py-24 px-6 bg-slate-900">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-2xl md:text-5xl font-black">Como funciona</h2>
+                        <p className="text-slate-400 mt-4 max-w-2xl mx-auto">Um fluxo simples para passar confiança do primeiro contato ao fechamento.</p>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-6">
+                        <div className="rounded-3xl border border-white/10 bg-slate-950 p-7">
+                            <div className="size-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center mb-5">
+                                <span className="material-symbols-outlined">badge</span>
+                            </div>
+                            <h3 className="font-black text-xl mb-2">1) Configure sua empresa</h3>
+                            <p className="text-sm text-slate-400 leading-relaxed">Logo, contatos e dados de cobrança ficam prontos para reaproveitar.</p>
+                        </div>
+                        <div className="rounded-3xl border border-white/10 bg-slate-950 p-7">
+                            <div className="size-12 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mb-5">
+                                <span className="material-symbols-outlined">request_quote</span>
+                            </div>
+                            <h3 className="font-black text-xl mb-2">2) Monte o orçamento</h3>
+                            <p className="text-sm text-slate-400 leading-relaxed">Crie a proposta em minutos e gere o documento pronto para enviar.</p>
+                        </div>
+                        <div className="rounded-3xl border border-white/10 bg-slate-950 p-7">
+                            <div className="size-12 rounded-2xl bg-purple-500/15 text-purple-400 flex items-center justify-center mb-5">
+                                <span className="material-symbols-outlined">ink_pen</span>
+                            </div>
+                            <h3 className="font-black text-xl mb-2">3) Envie, assine e acompanhe</h3>
+                            <p className="text-sm text-slate-400 leading-relaxed">Seu cliente assina no celular e você mantém tudo organizado no app.</p>
+                        </div>
+                    </div>
+                    <div className="mt-10 flex justify-center">
+                        <button
+                            onClick={() => navigate('/login')}
+                            className="h-14 px-10 rounded-full bg-primary text-white font-bold text-lg hover:bg-primary/90 transition-all shadow-xl shadow-primary/25 active:scale-95"
+                        >
+                            Começar agora
+                        </button>
+                    </div>
+                </div>
+            </section>
+
             {/* Pricing */}
             <section id="pricing" className="py-16 md:py-24 px-6 bg-slate-900">
                 <div className="max-w-5xl mx-auto text-center">
@@ -349,7 +447,7 @@ const LandingPage: React.FC = () => {
 
             {/* CTA Footer */}
             <footer className="py-16 md:py-24 px-6 bg-slate-950 text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-70"></div>
                 <div className="relative z-10 max-w-4xl mx-auto">
                     <h2 className="text-3xl md:text-6xl font-black mb-8 tracking-tight">Pronto para subir de nível?</h2>
                     <p className="text-xl text-slate-400 mb-10">Junte-se a milhares de profissionais que estão fechando mais contratos todos os dias.</p>

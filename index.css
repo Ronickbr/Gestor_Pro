@@ -18,6 +18,11 @@
   --color-border-light: hsl(210 15% 90%);
   --color-border-dark: hsl(210 25% 20%);
 
+  --color-text-light: hsl(222 47% 11%);
+  --color-text-dark: hsl(210 40% 98%);
+  --color-muted-light: hsl(215 16% 47%);
+  --color-muted-dark: hsl(215 20% 70%);
+
   /* Efeitos */
   --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
@@ -29,13 +34,13 @@
   body {
     @apply font-sans antialiased text-slate-800;
     background-color: var(--color-bg-light);
-    color: var(--color-bg-dark);
+    color: var(--color-text-light);
     -webkit-tap-highlight-color: transparent;
   }
 
   .dark body {
     background-color: var(--color-bg-dark);
-    color: var(--color-surface-light);
+    color: var(--color-text-dark);
   }
 
   /* Scrollbar Customizada */
@@ -115,12 +120,66 @@
   .stagger-4 { animation-delay: 400ms; }
   .stagger-5 { animation-delay: 500ms; }
 
+  @keyframes gp-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes gp-slide-in-from-bottom-4 {
+    from { transform: translateY(1rem); }
+    to { transform: translateY(0); }
+  }
+
+  @keyframes gp-slide-in-from-bottom-8 {
+    from { transform: translateY(2rem); }
+    to { transform: translateY(0); }
+  }
+
+  @keyframes gp-slide-in-from-top-5 {
+    from { transform: translateY(-1.25rem); }
+    to { transform: translateY(0); }
+  }
+
+  @keyframes gp-zoom-in {
+    from { transform: scale(0.98); }
+    to { transform: scale(1); }
+  }
+
+  .animate-in { animation-fill-mode: both; animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .fade-in { animation-name: gp-fade-in; animation-duration: 500ms; }
+  .zoom-in { animation-name: gp-zoom-in; animation-duration: 500ms; }
+  .slide-in-from-bottom-4 { animation-name: gp-slide-in-from-bottom-4; animation-duration: 700ms; }
+  .slide-in-from-bottom-8 { animation-name: gp-slide-in-from-bottom-8; animation-duration: 700ms; }
+  .slide-in-from-top-5 { animation-name: gp-slide-in-from-top-5; animation-duration: 200ms; }
+  .fill-mode-both { animation-fill-mode: both; }
+
   .animate-in-fade {
-    @apply animate-in fade-in duration-500 fill-mode-both;
+    animation: gp-fade-in 500ms both;
   }
 
   .animate-in-slide-up {
-    @apply animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both;
+    animation: gp-fade-in 700ms both, gp-slide-in-from-bottom-4 700ms both;
+  }
+
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-primary), 0 0 0 4px #ffffff;
+  }
+
+  .dark .focus-ring:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-primary), 0 0 0 4px #020617;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift,
+  .animate-in-fade,
+  .animate-in-slide-up {
+    animation: none !important;
+    transition: none !important;
   }
 }
 

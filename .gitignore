@@ -5,6 +5,7 @@ dist
 .DS_Store
 .agent
 .vscode
+.trae/documents
 ARCHITECTURE.md
 erros do console.md
 PROJECT_RULES.md

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { Button } from '../components/ui/Button';
+import { Field } from '../components/ui/Field';
+import { Input } from '../components/ui/Input';
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
@@ -80,164 +83,129 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-900 overflow-hidden relative p-4">
-            {/* Dynamic Background */}
+        <div className="min-h-screen flex items-center justify-center overflow-hidden relative p-4 bg-background-light dark:bg-slate-900">
             <div className="absolute inset-0 z-0">
-                <div className="absolute top-[-10%] left-[-10%] size-[500px] bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] size-[500px] bg-orange-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+                <div className="absolute top-[-10%] left-[-10%] size-[520px] bg-primary/15 rounded-full blur-[120px]"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] size-[520px] bg-purple-500/10 rounded-full blur-[120px]"></div>
             </div>
 
             <div className="w-full max-w-sm z-10 relative">
-                {/* Glass Card */}
-                <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl shadow-black/50 animate-in fade-in zoom-in duration-500">
-
-                    {/* Header Section */}
+                <div className="bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-slate-200/70 dark:border-white/15 rounded-3xl p-8 shadow-2xl shadow-black/10 dark:shadow-black/50">
                     <div className="flex flex-col items-center mb-8 text-center">
-                        <div className="mb-6 relative group">
-                            <div className="absolute inset-0 bg-white/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                            {/* Logo from public folder (user needs to add valid logo file) */}
-                            <img
-                                src="https://i.imgur.com/6i2hhmf.png"
-                                onError={(e) => {
-                                    e.currentTarget.onerror = null;
-                                    e.currentTarget.style.display = 'none';
-                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                }}
-                                className="size-28 object-contain relative z-10 drop-shadow-lg transform hover:scale-105 transition-transform duration-300"
-                                alt="Gestor Pro"
-                            />
-                            {/* Fallback if image not present */}
-                            <div className="hidden size-24 bg-gradient-to-br from-primary to-orange-500 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg relative z-10">
-                                <span className="material-symbols-outlined text-4xl mb-1">handyman</span>
-                                <span className="text-[10px] font-black tracking-tighter leading-none">GESTOR</span>
-                                <span className="text-[8px] font-bold tracking-widest opacity-80">PRO</span>
+                        <div className="mb-6 relative">
+                            <div className="absolute inset-0 bg-primary/10 rounded-2xl blur-xl"></div>
+                            <div className="relative size-16 rounded-2xl bg-white shadow-lg flex items-center justify-center dark:bg-white/10">
+                                <img src="/pwa-icon.svg" className="size-10 object-contain" alt="Gestor Pro" />
                             </div>
                         </div>
 
-                        <h1 className="text-2xl font-black text-white tracking-tight">
-                            {isResetting ? 'Recuperar Senha' : (isRegistering ? 'Criar Nova Conta' : 'Acessar Sistema')}
+                        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                            {isResetting ? 'Recuperar senha' : isRegistering ? 'Criar nova conta' : 'Acessar sistema'}
                         </h1>
-                        <p className="text-sm text-slate-300 mt-2 leading-relaxed">
-                            {isResetting 
+                        <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                            {isResetting
                                 ? 'Informe seu e-mail para receber as instruções de recuperação.'
-                                : (isRegistering
-                                    ? 'Junte-se a milhares de profissionais e transforme seus orçamentos.'
-                                    : 'Gerencie seus contratos e orçamentos com inteligência e praticidade.')}
+                                : isRegistering
+                                    ? 'Crie propostas profissionais e feche mais contratos com agilidade.'
+                                    : 'Gerencie contratos e orçamentos com praticidade e aparência profissional.'}
                         </p>
                     </div>
 
                     <form onSubmit={isResetting ? handleReset : handleLogin} className="space-y-5">
-                        {isRegistering && !isResetting && (
-                            <InputGroup icon="business" label="Nome da Empresa">
-                                <input
+                        {isRegistering && !isResetting ? (
+                            <Field label="Nome da empresa" htmlFor="companyName">
+                                <Input
+                                    id="companyName"
                                     type="text"
                                     required
                                     value={companyName}
                                     onChange={(e) => setCompanyName(e.target.value)}
-                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-sm text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                    startIcon="business"
                                     placeholder="Ex: Sua Empresa Ltda"
+                                    autoComplete="organization"
                                 />
-                            </InputGroup>
-                        )}
+                            </Field>
+                        ) : null}
 
-                        <InputGroup icon="mail" label="Seu E-mail">
-                            <input
+                        <Field label="Seu e-mail" htmlFor="email">
+                            <Input
+                                id="email"
                                 type="email"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-slate-900/50 border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-sm text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                startIcon="mail"
                                 placeholder="nome@exemplo.com"
+                                autoComplete="email"
+                                inputMode="email"
                             />
-                        </InputGroup>
+                        </Field>
 
-                        {!isResetting && (
-                            <InputGroup icon="lock" label="Sua Senha">
-                                <input
+                        {!isResetting ? (
+                            <Field label="Sua senha" htmlFor="password">
+                                <Input
+                                    id="password"
                                     type="password"
                                     required
                                     minLength={6}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-sm text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                    startIcon="lock"
                                     placeholder="••••••••"
+                                    autoComplete={isRegistering ? 'new-password' : 'current-password'}
                                 />
-                            </InputGroup>
-                        )}
+                            </Field>
+                        ) : null}
 
-                        {!isRegistering && !isResetting && (
+                        {!isRegistering && !isResetting ? (
                             <div className="flex justify-end">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setIsResetting(true)}
-                                    className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+                                    className="text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors focus-ring rounded-lg px-2 py-1"
                                 >
                                     Esqueceu a senha?
                                 </button>
                             </div>
-                        )}
+                        ) : null}
 
-                        <button
+                        <Button
                             type="submit"
-                            disabled={isLoading}
-                            className="w-full relative group overflow-hidden bg-gradient-to-r from-primary to-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-[0.98] transition-all"
+                            loading={isLoading}
+                            className={`w-full ${!isRegistering && !isResetting ? 'text-black' : ''}`}
                         >
-                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                            <div className="relative flex items-center justify-center gap-2">
-                                {isLoading ? (
-                                    <span className="material-symbols-outlined animate-spin">sync</span>
-                                ) : (
-                                    <span className="material-symbols-outlined">
-                                        {isResetting ? 'send' : (isRegistering ? 'person_add' : 'login')}
-                                    </span>
-                                )}
-                                <span>
-                                    {isLoading 
-                                        ? 'Aguarde...' 
-                                        : (isResetting 
-                                            ? 'Enviar Link de Recuperação' 
-                                            : (isRegistering ? 'Criar Conta Grátis' : 'Entrar na Plataforma'))}
+                            {!isLoading ? (
+                                <span className="material-symbols-outlined">
+                                    {isResetting ? 'send' : isRegistering ? 'person_add' : 'login'}
                                 </span>
-                            </div>
-                        </button>
+                            ) : null}
+                            {isResetting
+                                ? 'Enviar link de recuperação'
+                                : isRegistering
+                                    ? 'Criar conta grátis'
+                                    : 'Entrar na plataforma'}
+                        </Button>
                     </form>
 
-                    {/* Footer toggle */}
-                    <div className="mt-8 pt-6 border-t border-white/10 text-center">
-                        <p className="text-xs text-slate-400 mb-2">
-                            {isResetting 
-                                ? 'Lembrou sua senha?' 
-                                : (isRegistering ? 'Já possui cadastro?' : 'Novo por aqui?')}
+                    <div className="mt-8 pt-6 border-t border-slate-200/70 dark:border-white/10 text-center">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                            {isResetting ? 'Lembrou sua senha?' : isRegistering ? 'Já possui cadastro?' : 'Novo por aqui?'}
                         </p>
                         <button
                             onClick={isResetting ? () => setIsResetting(false) : toggleMode}
-                            className="text-sm font-black text-white hover:text-primary transition-colors tracking-wide uppercase"
+                            className="text-sm font-black text-slate-900 dark:text-white hover:text-primary transition-colors tracking-wide uppercase focus-ring rounded-lg px-3 py-2"
                         >
-                            {isResetting 
-                                ? 'Voltar para Login' 
-                                : (isRegistering ? 'Fazer Login' : 'Criar conta agora')}
+                            {isResetting ? 'Voltar para login' : isRegistering ? 'Fazer login' : 'Criar conta agora'}
                         </button>
                     </div>
                 </div>
 
-                {/* Bottom copyright */}
-                <p className="text-center text-[10px] text-slate-600 mt-8 font-medium">
+                <p className="text-center text-[10px] text-slate-500 mt-8 font-medium dark:text-slate-600">
                     &copy; 2024 Gestor Pro • Tecnologia em Serviços
                 </p>
             </div>
         </div>
     );
 };
-
-const InputGroup = ({ icon, label, children }: any) => (
-    <div className="space-y-1.5">
-        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">{label}</label>
-        <div className="relative group">
-            <span className="material-symbols-outlined absolute left-3 top-3.5 text-slate-500 text-lg group-focus-within:text-primary transition-colors">{icon}</span>
-            {children}
-        </div>
-    </div>
-);
 
 export default Login;

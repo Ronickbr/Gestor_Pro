@@ -5,6 +5,11 @@ import { useDialog } from '../contexts/DialogContext';
 import { profileService } from '../services/database';
 import { supabase } from '../lib/supabase';
 import { getGeminiApiKey, saveGeminiApiKey } from '../services/ai';
+import { useTheme } from '../hooks/useTheme';
+import { Button } from '../components/ui/Button';
+import { Field } from '../components/ui/Field';
+import { Input as TextInput } from '../components/ui/Input';
+import { InlineAlert } from '../components/ui/InlineAlert';
 
 interface UserProfile {
   name: string;
@@ -35,6 +40,7 @@ const saveAppSettings = (settings: any) => {
 const Settings: React.FC = () => {
   const navigate = useNavigate();
   const { confirm } = useDialog();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('geral');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [settings, setSettings] = useState(getAppSettings());
@@ -42,6 +48,7 @@ const Settings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [initialSnapshot, setInitialSnapshot] = useState<string | null>(null);
 
   useEffect(() => {
     loadProfile();
@@ -68,6 +75,7 @@ const Settings: React.FC = () => {
     try {
       const data = await profileService.getProfile();
       setProfile(data as any);
+      setInitialSnapshot((prev) => (prev === null ? JSON.stringify({ profile: data, settings, apiKey }) : prev));
     } catch (error) {
       console.error(error);
       toast.error('Erro ao carregar perfil');
@@ -76,6 +84,9 @@ const Settings: React.FC = () => {
     }
   };
 
+  const getSnapshot = () => JSON.stringify({ profile, settings, apiKey });
+  const hasChanges = initialSnapshot !== null && getSnapshot() !== initialSnapshot;
+
   const handleSaveProfile = async () => {
     if (!profile) return;
     setIsSaving(true);
@@ -83,6 +94,7 @@ const Settings: React.FC = () => {
       await profileService.updateProfile(profile);
       saveGeminiApiKey(apiKey);
       toast.success('Configurações salvas com sucesso!');
+      setInitialSnapshot(getSnapshot());
     } catch (e: any) {
       console.error('Erro ao salvar:', e);
       toast.error(`Erro ao salvar: ${e.message || 'Tente novamente'}`);
@@ -234,23 +246,12 @@ const Settings: React.FC = () => {
                 {activeTab === 'sistema' && 'Configurações do aplicativo e IA'}
               </p>
             </div>
-            <button
-              onClick={handleSaveProfile}
-              disabled={isSaving}
-              className="hidden md:flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl font-bold hover:bg-primary-dark transition-colors disabled:opacity-50 shadow-lg shadow-primary/20"
-            >
-              {isSaving ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin text-sm">refresh</span>
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-sm">save</span>
-                  Salvar Alterações
-                </>
-              )}
-            </button>
+            <div className="hidden md:block">
+              <Button type="button" onClick={handleSaveProfile} loading={isSaving} disabled={!hasChanges} className="px-6">
+                {!isSaving ? <span className="material-symbols-outlined text-sm">save</span> : null}
+                Salvar alterações
+              </Button>
+            </div>
           </div>
 
           {/* Abas */}
@@ -264,7 +265,7 @@ const Settings: React.FC = () => {
                     <div className="flex flex-col items-center gap-3">
                       <div className="relative group cursor-pointer">
                          <img 
-                          src={profile.logo || profile.avatar || "https://ui-avatars.com/api/?name=" + profile.name} 
+                          src={profile.logo || profile.avatar || "/pwa-icon.svg"} 
                           className="size-24 rounded-full border-4 border-slate-100 dark:border-white/5 object-cover" 
                           alt="Logo" 
                         />
@@ -296,39 +297,64 @@ const Settings: React.FC = () => {
                 <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm space-y-4">
                   <h3 className="font-bold text-slate-800 dark:text-white mb-2">Informações Básicas</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input 
-                      label="Nome Completo" 
-                      value={profile.name} 
-                      onChange={v => setProfile({...profile, name: v})} 
-                    />
-                    <Input 
-                      label="Nome da Empresa" 
-                      value={profile.companyName} 
-                      onChange={v => setProfile({...profile, companyName: v})} 
-                    />
-                    <Input 
-                      label="CPF / CNPJ" 
-                      value={profile.document} 
-                      onChange={v => setProfile({...profile, document: v})} 
-                    />
-                    <Input 
-                      label="Email" 
-                      type="email"
-                      value={profile.email} 
-                      onChange={v => setProfile({...profile, email: v})} 
-                    />
-                    <Input 
-                      label="Telefone / WhatsApp" 
-                      value={profile.phone} 
-                      onChange={v => setProfile({...profile, phone: v})} 
-                    />
+                    <Field label="Nome completo" htmlFor="profileName">
+                      <TextInput
+                        id="profileName"
+                        value={profile.name || ''}
+                        onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                        startIcon="person"
+                        autoComplete="name"
+                      />
+                    </Field>
+                    <Field label="Nome da empresa" htmlFor="profileCompanyName">
+                      <TextInput
+                        id="profileCompanyName"
+                        value={profile.companyName || ''}
+                        onChange={(e) => setProfile({ ...profile, companyName: e.target.value })}
+                        startIcon="business"
+                        autoComplete="organization"
+                      />
+                    </Field>
+                    <Field label="CPF / CNPJ" htmlFor="profileDocument">
+                      <TextInput
+                        id="profileDocument"
+                        value={profile.document || ''}
+                        onChange={(e) => setProfile({ ...profile, document: e.target.value })}
+                        startIcon="badge"
+                      />
+                    </Field>
+                    <Field label="E-mail" htmlFor="profileEmail">
+                      <TextInput
+                        id="profileEmail"
+                        type="email"
+                        value={profile.email || ''}
+                        onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                        startIcon="mail"
+                        autoComplete="email"
+                        inputMode="email"
+                      />
+                    </Field>
+                    <Field label="Telefone / WhatsApp" htmlFor="profilePhone">
+                      <TextInput
+                        id="profilePhone"
+                        value={profile.phone || ''}
+                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                        startIcon="call"
+                        inputMode="tel"
+                        autoComplete="tel"
+                      />
+                    </Field>
                   </div>
                   <div className="mt-4">
-                    <Input 
-                      label="Endereço Completo" 
-                      value={profile.address} 
-                      onChange={v => setProfile({...profile, address: v})} 
-                    />
+                    <Field label="Endereço completo" htmlFor="profileAddress">
+                      <TextInput
+                        id="profileAddress"
+                        value={profile.address || ''}
+                        onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+                        startIcon="location_on"
+                        autoComplete="street-address"
+                      />
+                    </Field>
                   </div>
                 </div>
               </div>
@@ -346,12 +372,15 @@ const Settings: React.FC = () => {
                       <p className="text-xs text-slate-500">Para receber pagamentos via Pix</p>
                     </div>
                   </div>
-                  <Input 
-                    label="Chave Pix" 
-                    placeholder="CPF, Email, Telefone ou Chave Aleatória"
-                    value={profile.pixKey} 
-                    onChange={v => setProfile({...profile, pixKey: v})} 
-                  />
+                  <Field label="Chave Pix" htmlFor="pixKey" hint="CPF, E-mail, Telefone ou Chave Aleatória">
+                    <TextInput
+                      id="pixKey"
+                      value={profile.pixKey || ''}
+                      onChange={(e) => setProfile({ ...profile, pixKey: e.target.value })}
+                      startIcon="payments"
+                      placeholder="CPF, E-mail, Telefone ou Chave Aleatória"
+                    />
+                  </Field>
                 </div>
 
                 <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm space-y-4">
@@ -390,35 +419,59 @@ const Settings: React.FC = () => {
                   
                   {profile.subscriptionStatus === 'active' ? (
                     <div className="space-y-3">
-                      <label className="text-xs font-bold text-slate-500 uppercase">Chave de API do Google Gemini</label>
-                      <div className="flex gap-2">
-                        <input
+                      <Field
+                        label="Chave de API do Google Gemini"
+                        htmlFor="geminiApiKey"
+                        hint="Sua chave é armazenada localmente no seu dispositivo por segurança."
+                      >
+                        <TextInput
+                          id="geminiApiKey"
                           type="password"
-                          className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-purple-500"
                           value={apiKey}
                           onChange={(e) => setApiKey(e.target.value)}
                           placeholder="AIza..."
+                          startIcon="key"
                         />
-                      </div>
-                      <p className="text-[10px] text-slate-400">
-                        Sua chave é armazenada localmente no seu dispositivo por segurança.
-                      </p>
+                      </Field>
                     </div>
                   ) : (
-                    <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl text-center">
-                      <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">Recurso exclusivo para assinantes PRO</p>
-                      <button 
-                        onClick={() => navigate('/subscription')}
-                        className="text-primary font-bold text-sm hover:underline"
-                      >
-                        Fazer Upgrade Agora
-                      </button>
-                    </div>
+                    <InlineAlert variant="warning" title="Recurso exclusivo para assinantes PRO">
+                      <div className="flex flex-col gap-3">
+                        <div>Faça upgrade para habilitar a geração automática de contratos com IA.</div>
+                        <div>
+                          <Button type="button" variant="secondary" size="sm" onClick={() => navigate('/subscription')}>
+                            Fazer upgrade agora
+                          </Button>
+                        </div>
+                      </div>
+                    </InlineAlert>
                   )}
                 </div>
 
                 {/* Preferências */}
                 <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm overflow-hidden">
+                  <div className="p-4 border-b border-slate-50 dark:border-white/5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-slate-100 dark:bg-white/10 rounded-lg text-slate-700 dark:text-slate-200">
+                        <span className="material-symbols-outlined">dark_mode</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-slate-900 dark:text-white leading-tight">Tema</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">Escolha claro, escuro ou sistema</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button type="button" size="sm" variant={theme === 'light' ? 'primary' : 'secondary'} onClick={() => setTheme('light')}>
+                        Claro
+                      </Button>
+                      <Button type="button" size="sm" variant={theme === 'dark' ? 'primary' : 'secondary'} onClick={() => setTheme('dark')}>
+                        Escuro
+                      </Button>
+                      <Button type="button" size="sm" variant={theme === 'system' ? 'primary' : 'secondary'} onClick={() => setTheme('system')}>
+                        Sistema
+                      </Button>
+                    </div>
+                  </div>
                   <div className="p-4 border-b border-slate-50 dark:border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg text-yellow-600">
@@ -428,7 +481,9 @@ const Settings: React.FC = () => {
                     </div>
                      <button
                       onClick={() => setSettings({ ...settings, pushNotifications: !settings.pushNotifications })}
-                      className={`w-12 h-6 rounded-full relative p-1 transition-colors duration-300 flex items-center ${settings.pushNotifications ? 'bg-primary justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'}`}
+                      className={`w-12 h-6 rounded-full relative p-1 transition-colors duration-300 flex items-center focus-ring ${settings.pushNotifications ? 'bg-primary justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'}`}
+                      aria-pressed={settings.pushNotifications}
+                      aria-label="Alternar notificações push"
                     >
                       <div className="size-4 bg-white rounded-full shadow-md"></div>
                     </button>
@@ -492,40 +547,20 @@ const Settings: React.FC = () => {
 
         {/* Mobile Save Button (Floating) */}
         <div className="md:hidden fixed bottom-[90px] left-4 right-4 z-50">
-          <button
+          <Button
+            type="button"
             onClick={handleSaveProfile}
-            disabled={isSaving}
-            className="w-full bg-primary text-white py-3.5 rounded-xl font-bold shadow-xl shadow-primary/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+            loading={isSaving}
+            disabled={!hasChanges}
+            className="w-full shadow-xl shadow-primary/30"
           >
-             {isSaving ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin">refresh</span>
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined">save</span>
-                  Salvar Alterações
-                </>
-              )}
-          </button>
+            {!isSaving ? <span className="material-symbols-outlined">save</span> : null}
+            Salvar alterações
+          </Button>
         </div>
       </div>
     </div>
   );
 };
-
-const Input = ({ label, value, onChange, type = "text", placeholder }: any) => (
-  <div className="space-y-1.5">
-    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wider">{label}</label>
-    <input
-      type={type}
-      className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400"
-      value={value || ''}
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
-    />
-  </div>
-);
 
 export default Settings;

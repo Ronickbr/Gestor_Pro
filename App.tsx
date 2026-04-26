@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import { DialogProvider } from './contexts/DialogContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from './hooks/useAuth';
+import { BOTTOM_NAV_ITEMS, isFullWidthRoute, shouldHideNav } from './lib/navigation';
 
 // Lazy loading pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -46,27 +47,20 @@ const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const tabs = [
-    { path: '/dashboard', label: 'Início', icon: 'home' },
-    { path: '/quotes', label: 'Orçamentos', icon: 'request_quote' },
-    { path: '/plus', label: '', icon: 'add', isFab: true },
-    { path: '/clients', label: 'Clientes', icon: 'group' },
-    { path: '/settings', label: 'Ajustes', icon: 'settings' }
-  ];
-
   // Don't show nav on login page
-  if (['/', '/login', '/subscription', '/landing', '/terms', '/privacy', '/contact'].includes(location.pathname) || location.pathname.startsWith('/v/')) return null;
+  if (shouldHideNav(location.pathname)) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 z-50 w-full glass shadow-lg no-print md:hidden pb-6 pt-2 px-6">
       <div className="flex items-center justify-between">
-        {tabs.map((tab) => {
+        {BOTTOM_NAV_ITEMS.map((tab) => {
           if (tab.isFab) {
             return (
               <div key="fab" className="relative -top-6">
                 <button
-                  onClick={() => navigate('/new-quote')}
+                  onClick={() => navigate(tab.path)}
                   className="flex size-14 items-center justify-center rounded-full bg-primary text-white shadow-xl shadow-primary/30 active:scale-95 transition-transform"
+                  aria-label="Novo orçamento"
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>{tab.icon}</span>
                 </button>
@@ -79,7 +73,8 @@ const BottomNav = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-slate-400'}`}
+              className={`flex flex-col items-center gap-1 transition-colors focus-ring rounded-lg px-2 py-1 ${isActive ? 'text-primary' : 'text-slate-500 dark:text-slate-400'}`}
+              aria-current={isActive ? 'page' : undefined}
             >
               <span className={`material-symbols-outlined ${isActive ? 'filled' : ''}`}>{tab.icon}</span>
               <span className="text-[10px] font-medium">{tab.label}</span>
@@ -124,9 +119,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
-
-  const hiddenRoutes = ['/login', '/subscription', '/landing', '/v/', '/terms', '/privacy', '/contact', '/update-password'];
-  const isFullWidth = location.pathname === '/' || hiddenRoutes.some(route => location.pathname.startsWith(route));
+  const isFullWidth = location.pathname === '/' || isFullWidthRoute(location.pathname);
 
   return (
     <div className="flex min-h-screen bg-background-light dark:bg-background-dark">

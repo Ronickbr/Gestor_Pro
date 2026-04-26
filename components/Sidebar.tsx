@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDialog } from '../contexts/DialogContext';
 import { supabase } from '../lib/supabase';
+import { SIDEBAR_NAV_ITEMS, shouldHideNav } from '../lib/navigation';
 
 export const Sidebar: React.FC = () => {
     const location = useLocation();
@@ -25,27 +26,17 @@ export const Sidebar: React.FC = () => {
     };
 
     // Don't show nav on these pages
-    if (['/', '/login', '/subscription', '/landing', '/terms', '/privacy', '/contact'].includes(location.pathname) || location.pathname.startsWith('/v/')) return null;
-
-    const tabs = [
-        { path: '/dashboard', label: 'Início', icon: 'dashboard' },
-        { path: '/quotes', label: 'Orçamentos', icon: 'request_quote' },
-        { path: '/clients', label: 'Clientes', icon: 'group' },
-        { path: '/products', label: 'Catálogo', icon: 'inventory_2' },
-        { path: '/contract-templates', label: 'Modelos de Contrato', icon: 'description' },
-        { path: '/feedback', label: 'Feedback', icon: 'rate_review' },
-        { path: '/settings', label: 'Configurações', icon: 'settings' }
-    ];
+    if (shouldHideNav(location.pathname)) return null;
 
     return (
         <aside className="fixed top-0 left-0 z-40 w-64 h-screen transition-all glass-card border-y-0 border-l-0 rounded-none md:translate-x-0 hidden md:flex flex-col shadow-2xl">
             <div className="h-20 flex items-center px-6 border-b border-white/5">
-                <img src="https://i.imgur.com/6i2hhmf.png" className="h-8 w-auto object-contain brightness-110" alt="Gestor Pro" />
+                <img src="/pwa-icon.svg" className="h-8 w-auto object-contain brightness-110" alt="Gestor Pro" />
                 <span className="ml-3 font-black text-xl text-slate-900 dark:text-white tracking-tighter">Gestor<span className="text-primary">Pro</span></span>
             </div>
 
             <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
-                {tabs.map((tab) => {
+                {SIDEBAR_NAV_ITEMS.map((tab) => {
                     const isActive = location.pathname === tab.path;
                     return (
                         <button
@@ -54,7 +45,8 @@ export const Sidebar: React.FC = () => {
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm group ${isActive
                                 ? 'bg-primary/10 text-primary font-bold shadow-sm shadow-primary/5'
                                 : 'text-slate-500 hover:bg-white/50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary-light'
-                                }`}
+                                } focus-ring`}
+                            aria-current={isActive ? 'page' : undefined}
                         >
                             <span className={`material-symbols-outlined transition-transform group-hover:scale-110 ${isActive ? 'filled' : ''}`}>{tab.icon}</span>
                             {tab.label}
