@@ -1,6 +1,7 @@
 
 import { UserProfile } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { generateNextCatalogCode } from '../../lib/catalog';
 
 export const profileModule = {
     async getProfile(): Promise<UserProfile> {
@@ -34,14 +35,51 @@ export const profileModule = {
             ...data,
             companyName: data.company_name,
             techSignature: data.tech_signature,
-            materialCatalog: (data.material_catalog || []).map((item: any) => ({
-                id: item.id || crypto.randomUUID(),
-                name: item.name || '',
-                brand: item.brand || item.category || 'Geral',
-                unitPrice: Number(item.unitPrice || item.price || 0),
-                quantity: item.quantity || 1,
-                totalPrice: Number(item.totalPrice || item.unitPrice || item.price || 0)
-            })),
+            materialCatalog: (() => {
+                const raw = (data.material_catalog || []).map((item: any) => {
+                    const unitPrice = Number(item.unitPrice ?? item.price ?? 0);
+                    const kind = item.kind === 'service' ? 'service' : 'product';
+                    const category = item.category || item.brand || 'Geral';
+                    const code = item.code || '';
+                    const cost = item.cost !== undefined ? Number(item.cost) : undefined;
+                    const margin =
+                        item.margin !== undefined
+                            ? Number(item.margin)
+                            : cost !== undefined && unitPrice > 0
+                                ? ((unitPrice - cost) / unitPrice) * 100
+                                : undefined;
+
+                    return {
+                        id: item.id || crypto.randomUUID(),
+                        catalogItemId: item.catalogItemId,
+                        kind,
+                        status: item.status || 'active',
+                        code,
+                        category,
+                        unit: item.unit || 'un',
+                        description: item.description,
+                        cost,
+                        margin,
+                        name: item.name || '',
+                        brand: item.brand || category,
+                        unitPrice,
+                        quantity: 1,
+                        totalPrice: unitPrice
+                    };
+                });
+
+                const withCodes: any[] = [];
+                for (const item of raw) {
+                    if (item.code) {
+                        withCodes.push(item);
+                        continue;
+                    }
+                    const nextCode = generateNextCatalogCode(withCodes, item.kind || 'product');
+                    withCodes.push({ ...item, code: nextCode });
+                }
+
+                return withCodes;
+            })(),
             contractTemplates: data.contract_templates || [],
             subscriptionStatus: data.subscription_status,
             trialEndsAt: data.trial_ends_at,

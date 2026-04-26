@@ -17,6 +17,12 @@ export const QuoteStatusLabels: Record<QuoteStatus, string> = {
 
 export interface ServiceItem {
   id: string;
+  catalogItemId?: string;
+  code?: string;
+  category?: string;
+  unit?: string;
+  cost?: number;
+  margin?: number;
   name: string;
   description: string;
   price: number;
@@ -24,6 +30,15 @@ export interface ServiceItem {
 
 export interface MaterialItem {
   id: string;
+  catalogItemId?: string;
+  kind?: 'product' | 'service';
+  status?: 'active' | 'inactive';
+  code?: string;
+  category?: string;
+  unit?: string;
+  description?: string;
+  cost?: number;
+  margin?: number;
   name: string;
   brand: string;
   quantity: number;

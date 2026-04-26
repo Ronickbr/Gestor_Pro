@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { Quote, QuoteStatus, ServiceItem, MaterialItem, Client } from '../types';
+import { Quote, QuoteStatus, ServiceItem, MaterialItem, Client, UserProfile } from '../types';
 import toast from 'react-hot-toast';
 
 import { quotesService, clientsService, profileService } from '../services/database';
 import { generateContractText } from '../services/contractGenerator';
+import { CatalogPickerModal } from '../components/CatalogPickerModal';
+import { canCreateCatalogItems, mergeCatalogItems } from '../lib/catalog';
 
 interface ValidationError {
   [key: string]: {
@@ -33,6 +35,9 @@ const NewQuoteForm: React.FC = () => {
   ]);
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [pendingCatalogItems, setPendingCatalogItems] = useState<MaterialItem[]>([]);
+  const [catalogPicker, setCatalogPicker] = useState<{ mode: 'material' | 'service'; rowId: string } | null>(null);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<{ id: string, type: 'service' | 'material' } | null>(null);
 
   const [errors, setErrors] = useState<ValidationError>({});
@@ -62,6 +67,7 @@ const NewQuoteForm: React.FC = () => {
       let profileData = null;
       try {
         profileData = await profileService.getProfile();
+        setProfile(profileData as any);
         setCatalog(profileData.materialCatalog || []);
 
         if (profileData.contractTemplates && profileData.contractTemplates.length > 0) {
@@ -131,7 +137,7 @@ const NewQuoteForm: React.FC = () => {
   };
 
   const updateService = (id: string, field: keyof ServiceItem, value: any) => {
-    setServices(services.map(s => s.id === id ? { ...s, [field]: value } : s));
+    setServices(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
     if (errors[id]?.[field]) {
       const newErrors = { ...errors };
       delete newErrors[id][field];
@@ -140,7 +146,7 @@ const NewQuoteForm: React.FC = () => {
   };
 
   const updateMaterial = (id: string, field: keyof MaterialItem, value: any) => {
-    setMaterials(materials.map(m => {
+    setMaterials(prev => prev.map(m => {
       if (m.id === id) {
         const updatedItem = { ...m, [field]: value };
         if (field === 'quantity' || field === 'unitPrice') {
@@ -160,10 +166,25 @@ const NewQuoteForm: React.FC = () => {
   const selectFromCatalog = (id: string, item: CatalogItem, type: 'service' | 'material') => {
     if (type === 'service') {
       updateService(id, 'name', item.name);
+      updateService(id, 'description', item.description || '');
       updateService(id, 'price', item.unitPrice);
+      updateService(id, 'catalogItemId', item.id);
+      updateService(id, 'code', item.code);
+      updateService(id, 'category', item.category || item.brand);
+      updateService(id, 'unit', item.unit);
+      updateService(id, 'cost', item.cost);
+      updateService(id, 'margin', item.margin);
     } else {
       updateMaterial(id, 'name', item.name);
       updateMaterial(id, 'unitPrice', item.unitPrice);
+      updateMaterial(id, 'brand', item.brand || item.category || 'Geral');
+      updateMaterial(id, 'catalogItemId', item.id);
+      updateMaterial(id, 'code', item.code);
+      updateMaterial(id, 'category', item.category || item.brand);
+      updateMaterial(id, 'unit', item.unit);
+      updateMaterial(id, 'description', item.description);
+      updateMaterial(id, 'cost', item.cost);
+      updateMaterial(id, 'margin', item.margin);
     }
     setActiveSuggestionIndex(null);
   };
@@ -219,40 +240,47 @@ const NewQuoteForm: React.FC = () => {
     setShowErrors(true);
     if (!validate()) return;
 
-    // Save new items to catalog
-    try {
-      const profile = await profileService.getProfile();
-      const currentCatalog = profile.materialCatalog || [];
-      const newItems: any[] = [];
+    let servicesToSave = services;
+    let materialsToSave = materials;
 
-      materials.forEach(m => {
-        if (!currentCatalog.find((c: any) => c.name === m.name)) {
-          newItems.push({ 
-            id: crypto.randomUUID(),
-            name: m.name, 
-            unitPrice: m.unitPrice, 
-            brand: m.brand || 'Geral',
-            quantity: 1,
-            totalPrice: m.unitPrice
+    if (pendingCatalogItems.length > 0) {
+      try {
+        const profileFresh = await profileService.getProfile();
+        const currentCatalog = profileFresh.materialCatalog || [];
+
+        if (!canCreateCatalogItems(profileFresh)) {
+          toast.error('Você não tem permissão para adicionar novos itens ao catálogo.');
+        } else {
+          const { catalog: merged, idMap, codeMap } = mergeCatalogItems(currentCatalog, pendingCatalogItems);
+          await profileService.updateProfile({ materialCatalog: merged });
+          setCatalog(merged);
+          setPendingCatalogItems([]);
+
+          servicesToSave = services.map((s) => {
+            if (!s.catalogItemId) return s;
+            const nextId = idMap.get(s.catalogItemId);
+            const nextCode = codeMap.get(s.catalogItemId);
+            return nextId ? { ...s, catalogItemId: nextId, code: nextCode || s.code } : s;
+          });
+
+          materialsToSave = materials.map((m) => {
+            if (!m.catalogItemId) return m;
+            const nextId = idMap.get(m.catalogItemId);
+            const nextCode = codeMap.get(m.catalogItemId);
+            return nextId ? { ...m, catalogItemId: nextId, code: nextCode || m.code } : m;
           });
         }
-      });
-
-      if (newItems.length > 0) {
-        await profileService.updateProfile({
-          materialCatalog: [...currentCatalog, ...newItems]
-        });
+      } catch (error) {
+        console.error('Erro ao salvar catálogo', error);
       }
-    } catch (error) {
-      console.error('Erro ao salvar catálogo', error);
     }
 
     try {
       const quoteData = {
         number: '#' + Math.floor(1000 + Math.random() * 9000), // Should probably stay same if editing
         status: QuoteStatus.SENT, // Or keep existing status
-        services,
-        materials,
+        services: servicesToSave,
+        materials: materialsToSave,
         warrantyDuration,
         paymentTerms,
         contractTerms: '', // Will be generated or updated separately?
@@ -579,17 +607,27 @@ const NewQuoteForm: React.FC = () => {
                   {services.map((s) => (
                     <div key={s.id} className="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border dark:border-white/5 flex gap-4 items-start md:border md:border-slate-100 md:shadow-none transition-all hover:border-primary/30">
                       <div className="flex-1 space-y-2 relative">
-                        <input
-                          placeholder="Buscar serviço no catálogo..."
-                          className={`w-full bg-transparent border-none p-0 text-sm font-medium focus:ring-0 placeholder:text-slate-300 ${showErrors && errors[s.id]?.name ? 'text-red-500' : ''}`}
-                          value={s.name}
-                          onFocus={() => setActiveSuggestionIndex({ id: s.id, type: 'service' })}
-                          onChange={e => updateService(s.id, 'name', e.target.value)}
-                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            placeholder="Buscar serviço no catálogo..."
+                            className={`w-full bg-transparent border-none p-0 text-sm font-medium focus:ring-0 placeholder:text-slate-300 ${showErrors && errors[s.id]?.name ? 'text-red-500' : ''}`}
+                            value={s.name}
+                            onFocus={() => setActiveSuggestionIndex({ id: s.id, type: 'service' })}
+                            onChange={e => updateService(s.id, 'name', e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setCatalogPicker({ mode: 'service', rowId: s.id })}
+                            className="shrink-0 h-9 px-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 focus-ring"
+                          >
+                            Catálogo
+                          </button>
+                        </div>
                         {activeSuggestionIndex?.id === s.id && activeSuggestionIndex.type === 'service' && s.name.length > 1 && (
                           <div className="absolute left-0 right-0 top-8 z-[60] bg-white dark:bg-surface-dark border dark:border-white/10 rounded-xl shadow-xl max-h-40 overflow-y-auto divide-y dark:divide-white/5">
                             {catalog
-                              .filter(c => c.name.toLowerCase().includes(s.name.toLowerCase()) || (c.brand && c.brand.toLowerCase().includes(s.name.toLowerCase())))
+                              .filter(c => c.kind === 'service' || !c.kind)
+                              .filter(c => c.name.toLowerCase().includes(s.name.toLowerCase()) || (c.brand && c.brand.toLowerCase().includes(s.name.toLowerCase())) || (c.code && c.code.toLowerCase().includes(s.name.toLowerCase())))
                               .map((item, idx) => (
                                 <button
                                   key={idx}
@@ -635,18 +673,27 @@ const NewQuoteForm: React.FC = () => {
 
                 <div className="space-y-3">
                   {materials.map((m, mIdx) => {
-                    const suggestions = m.name.length > 1 ? catalog.filter(c => c.name.toLowerCase().includes(m.name.toLowerCase())) : [];
+                    const suggestions = m.name.length > 1 ? catalog.filter(c => (c.kind || 'product') !== 'service').filter(c => c.name.toLowerCase().includes(m.name.toLowerCase()) || (c.code && c.code.toLowerCase().includes(m.name.toLowerCase()))) : [];
                     return (
                       <div key={m.id} className="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border dark:border-white/5 relative md:border md:border-slate-100 md:shadow-none transition-all hover:border-primary/30">
                         <div className="flex flex-col md:flex-row gap-4 items-start">
                           <div className="flex-1 w-full relative">
-                            <input
-                              placeholder="Buscar ou digitar produto..."
-                              className={`w-full bg-transparent border-none p-0 text-sm font-medium focus:ring-0 placeholder:text-slate-300 ${showErrors && errors[m.id]?.name ? 'text-red-500' : ''}`}
-                              value={m.name}
-                              onFocus={() => setActiveSuggestionIndex({ id: m.id, index: mIdx })}
-                              onChange={e => updateMaterial(m.id, 'name', e.target.value)}
-                            />
+                            <div className="flex items-center gap-2">
+                              <input
+                                placeholder="Buscar ou digitar produto..."
+                                className={`w-full bg-transparent border-none p-0 text-sm font-medium focus:ring-0 placeholder:text-slate-300 ${showErrors && errors[m.id]?.name ? 'text-red-500' : ''}`}
+                                value={m.name}
+                                onFocus={() => setActiveSuggestionIndex({ id: m.id, type: 'material' })}
+                                onChange={e => updateMaterial(m.id, 'name', e.target.value)}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setCatalogPicker({ mode: 'material', rowId: m.id })}
+                                className="shrink-0 h-9 px-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 focus-ring"
+                              >
+                                Catálogo
+                              </button>
+                            </div>
 
                             {activeSuggestionIndex?.id === m.id && activeSuggestionIndex.type === 'material' && suggestions.length > 0 && (
                               <div className="absolute left-0 right-0 top-8 z-[60] bg-white dark:bg-surface-dark border dark:border-white/10 rounded-xl shadow-xl max-h-40 overflow-y-auto divide-y dark:divide-white/5">
@@ -725,6 +772,26 @@ const NewQuoteForm: React.FC = () => {
             </button>
           </div>
         </footer>
+
+        <CatalogPickerModal
+          open={!!catalogPicker}
+          mode={catalogPicker?.mode || 'material'}
+          items={catalog}
+          allowCreate={canCreateCatalogItems(profile)}
+          onClose={() => setCatalogPicker(null)}
+          onSelect={(item) => {
+            if (!catalogPicker) return;
+            selectFromCatalog(catalogPicker.rowId, item, catalogPicker.mode === 'service' ? 'service' : 'material');
+            setCatalogPicker(null);
+          }}
+          onCreate={(item) => {
+            if (!catalogPicker) return;
+            setCatalog((prev) => [...prev, item]);
+            setPendingCatalogItems((prev) => [...prev, item]);
+            selectFromCatalog(catalogPicker.rowId, item, catalogPicker.mode === 'service' ? 'service' : 'material');
+            setCatalogPicker(null);
+          }}
+        />
       </div>
     </div>
   );
