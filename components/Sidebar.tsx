@@ -38,7 +38,7 @@ export const Sidebar: React.FC = () => {
     ];
 
     return (
-        <aside className="fixed top-0 left-0 z-40 w-64 h-screen transition-all glass border-r-0 md:translate-x-0 hidden md:flex flex-col shadow-2xl">
+        <aside className="fixed top-0 left-0 z-40 w-64 h-screen transition-all glass-card border-y-0 border-l-0 rounded-none md:translate-x-0 hidden md:flex flex-col shadow-2xl">
             <div className="h-20 flex items-center px-6 border-b border-white/5">
                 <img src="https://i.imgur.com/6i2hhmf.png" className="h-8 w-auto object-contain brightness-110" alt="Gestor Pro" />
                 <span className="ml-3 font-black text-xl text-slate-900 dark:text-white tracking-tighter">Gestor<span className="text-primary">Pro</span></span>

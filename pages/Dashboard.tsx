@@ -177,9 +177,9 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col p-4 w-full mx-auto md:max-w-7xl pb-32 md:pb-10 space-y-6">
+    <div className="flex flex-col p-4 w-full mx-auto md:max-w-7xl pb-32 md:pb-10 space-y-6 animate-in-fade">
       {/* Header */}
-      <div className="flex items-center justify-between pt-4">
+      <div className="flex items-center justify-between pt-4 animate-in-slide-up stagger-1">
         <div className="flex items-center gap-3">
           <div className="relative">
             <img
@@ -245,7 +245,7 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-in-slide-up stagger-2">
         {/* Total Revenue */}
         <div className="glass-card p-5 flex flex-col justify-between h-32 hover-lift">
           <div className="flex justify-between items-start">
@@ -312,7 +312,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Content Grid: Charts & Top Clients */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in-slide-up stagger-3">
         
         {/* Revenue Chart */}
         <div className="md:col-span-2 glass-card p-6">
@@ -381,7 +381,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Quick Access */}
-      <div>
+      <div className="animate-in-slide-up stagger-4">
         <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Acesso Rápido</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <QuickAction
@@ -416,7 +416,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="pb-10">
+      <div className="pb-10 animate-in-slide-up stagger-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Atividade Recente</h3>
           <button className="text-xs font-semibold text-primary" onClick={() => navigate('/quotes')}>Ver tudo</button>

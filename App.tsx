@@ -1,34 +1,37 @@
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import QuotesList from './pages/QuotesList';
-import NewQuoteSelection from './pages/NewQuoteSelection';
-import NewQuoteForm from './pages/NewQuoteForm';
-import QuoteSummary from './pages/QuoteSummary';
-import ContractReview from './pages/ContractReview';
-import SignaturePage from './pages/SignaturePage';
-import Settings from './pages/Settings';
-import ClientsList from './pages/ClientsList';
-import NewClient from './pages/NewClient';
-import ContractTemplates from './pages/ContractTemplates';
-import TechSignature from './pages/TechSignature';
-import Login from './pages/Login';
-import Subscription from './pages/Subscription';
-import PaymentSuccess from './pages/PaymentSuccess';
-import PublicQuoteView from './pages/PublicQuoteView';
-import LandingPage from './pages/LandingPage';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import Contact from './pages/Contact';
-import UpdatePassword from './pages/UpdatePassword';
-import Feedback from './pages/Feedback';
-import Products from './pages/Products';
 import { supabase } from './lib/supabase';
 import { Sidebar } from './components/Sidebar';
 import { Toaster } from 'react-hot-toast';
 import { DialogProvider } from './contexts/DialogContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAuth } from './hooks/useAuth';
+
+// Lazy loading pages
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const QuotesList = lazy(() => import('./pages/QuotesList'));
+const NewQuoteSelection = lazy(() => import('./pages/NewQuoteSelection'));
+const NewQuoteForm = lazy(() => import('./pages/NewQuoteForm'));
+const QuoteSummary = lazy(() => import('./pages/QuoteSummary'));
+const ContractReview = lazy(() => import('./pages/ContractReview'));
+const SignaturePage = lazy(() => import('./pages/SignaturePage'));
+const Settings = lazy(() => import('./pages/Settings'));
+const ClientsList = lazy(() => import('./pages/ClientsList'));
+const NewClient = lazy(() => import('./pages/NewClient'));
+const ContractTemplates = lazy(() => import('./pages/ContractTemplates'));
+const TechSignature = lazy(() => import('./pages/TechSignature'));
+const Login = lazy(() => import('./pages/Login'));
+const Subscription = lazy(() => import('./pages/Subscription'));
+const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
+const PublicQuoteView = lazy(() => import('./pages/PublicQuoteView'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Contact = lazy(() => import('./pages/Contact'));
+const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
+const Feedback = lazy(() => import('./pages/Feedback'));
+const Products = lazy(() => import('./pages/Products'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,7 +58,7 @@ const BottomNav = () => {
   if (['/', '/login', '/subscription', '/landing', '/terms', '/privacy', '/contact'].includes(location.pathname) || location.pathname.startsWith('/v/')) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 z-50 w-full bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-white/5 pb-6 pt-2 px-6 shadow-lg no-print md:hidden">
+    <nav className="fixed bottom-0 left-0 z-50 w-full glass shadow-lg no-print md:hidden pb-6 pt-2 px-6">
       <div className="flex items-center justify-between">
         {tabs.map((tab) => {
           if (tab.isFab) {
@@ -89,47 +92,22 @@ const BottomNav = () => {
 };
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const [authorized, setAuthorized] = React.useState<string | boolean | null>(null);
+  const { status, loading } = useAuth();
   const location = useLocation();
 
-  React.useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setAuthorized(false);
-        return;
-      }
+  if (loading) {
+    return <div className="h-screen flex items-center justify-center animate-pulse">Carregando...</div>;
+  }
 
-      // Check trial status
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('subscription_status, trial_ends_at')
-          .eq('id', session.user.id)
-          .single();
+  if (status === 'expired' && location.pathname !== '/subscription' && location.pathname !== '/payment-success') {
+    return <Navigate to="/subscription" replace />;
+  }
 
-        if (!error && data) {
-          const isExpired = data.subscription_status === 'expired' ||
-            (data.trial_ends_at && new Date(data.trial_ends_at) < new Date());
+  if (status === 'unauthenticated') {
+    return <Navigate to="/login" replace />;
+  }
 
-          if (isExpired && location.pathname !== '/subscription' && location.pathname !== '/payment-success') {
-            // Redirect to subscription if expired
-            setAuthorized('expired');
-            return;
-          }
-        }
-      } catch (e) {
-        console.error("Auth check failed", e);
-      }
-
-      setAuthorized(true);
-    };
-    checkAuth();
-  }, [location.pathname]);
-
-  if (authorized === null) return <div className="h-screen flex items-center justify-center animate-pulse">Carregando...</div>;
-  if (authorized === 'expired') return <Navigate to="/subscription" replace />;
-  return authorized ? <>{children}</> : <Navigate to="/login" replace />;
+  return <>{children}</>;
 };
 
 
@@ -167,36 +145,38 @@ const App: React.FC = () => {
       <HashRouter>
         <DialogProvider>
           <AppLayout>
-          <Routes>
-            <Route path="/landing" element={<LandingPage />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/update-password" element={<UpdatePassword />} />
-            <Route path="/v/:token" element={<PublicQuoteView />} />
-            <Route path="/" element={<Login />} />
-            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-            <Route path="/quotes" element={<PrivateRoute><QuotesList /></PrivateRoute>} />
-            <Route path="/clients" element={<PrivateRoute><ClientsList /></PrivateRoute>} />
-            <Route path="/new-client" element={<PrivateRoute><NewClient /></PrivateRoute>} />
-            <Route path="/edit-client/:id" element={<PrivateRoute><NewClient /></PrivateRoute>} />
-            <Route path="/new-quote" element={<PrivateRoute><NewQuoteSelection /></PrivateRoute>} />
-            <Route path="/new-quote/form" element={<PrivateRoute><NewQuoteForm /></PrivateRoute>} />
-            <Route path="/edit-quote/:id" element={<PrivateRoute><NewQuoteForm /></PrivateRoute>} />
-            <Route path="/quote/:id" element={<PrivateRoute><QuoteSummary /></PrivateRoute>} />
-            <Route path="/contract/:id" element={<PrivateRoute><ContractReview /></PrivateRoute>} />
-            <Route path="/signature/:id" element={<PrivateRoute><SignaturePage /></PrivateRoute>} />
-            <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
-            <Route path="/contract-templates" element={<PrivateRoute><ContractTemplates /></PrivateRoute>} />
-            <Route path="/tech-signature" element={<PrivateRoute><TechSignature /></PrivateRoute>} />
-            <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
-            <Route path="/payment-success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
-            <Route path="/feedback" element={<PrivateRoute><Feedback /></PrivateRoute>} />
-            <Route path="/products" element={<PrivateRoute><Products /></PrivateRoute>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AppLayout>
+            <Suspense fallback={<div className="h-screen flex items-center justify-center animate-pulse text-primary font-medium">Carregando...</div>}>
+              <Routes>
+                <Route path="/landing" element={<LandingPage />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/update-password" element={<UpdatePassword />} />
+                <Route path="/v/:token" element={<PublicQuoteView />} />
+                <Route path="/" element={<Login />} />
+                <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                <Route path="/quotes" element={<PrivateRoute><QuotesList /></PrivateRoute>} />
+                <Route path="/clients" element={<PrivateRoute><ClientsList /></PrivateRoute>} />
+                <Route path="/new-client" element={<PrivateRoute><NewClient /></PrivateRoute>} />
+                <Route path="/edit-client/:id" element={<PrivateRoute><NewClient /></PrivateRoute>} />
+                <Route path="/new-quote" element={<PrivateRoute><NewQuoteSelection /></PrivateRoute>} />
+                <Route path="/new-quote/form" element={<PrivateRoute><NewQuoteForm /></PrivateRoute>} />
+                <Route path="/edit-quote/:id" element={<PrivateRoute><NewQuoteForm /></PrivateRoute>} />
+                <Route path="/quote/:id" element={<PrivateRoute><QuoteSummary /></PrivateRoute>} />
+                <Route path="/contract/:id" element={<PrivateRoute><ContractReview /></PrivateRoute>} />
+                <Route path="/signature/:id" element={<PrivateRoute><SignaturePage /></PrivateRoute>} />
+                <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+                <Route path="/contract-templates" element={<PrivateRoute><ContractTemplates /></PrivateRoute>} />
+                <Route path="/tech-signature" element={<PrivateRoute><TechSignature /></PrivateRoute>} />
+                <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+                <Route path="/payment-success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
+                <Route path="/feedback" element={<PrivateRoute><Feedback /></PrivateRoute>} />
+                <Route path="/products" element={<PrivateRoute><Products /></PrivateRoute>} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </AppLayout>
         <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       </DialogProvider>
     </HashRouter>

@@ -98,7 +98,7 @@ const QuotesList: React.FC = () => {
             <p className="text-sm font-medium animate-pulse">Carregando...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in-slide-up stagger-2">
             {activeFilters.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400 col-span-full">
                 <span className="material-symbols-outlined text-6xl mb-4">folder_open</span>
@@ -110,7 +110,7 @@ const QuotesList: React.FC = () => {
               <div
                 key={quote.id}
                 onClick={() => navigate(`/quote/${quote.id}`)}
-                className="group relative flex flex-col bg-white dark:bg-surface-dark rounded-2xl border dark:border-white/5 shadow-sm overflow-hidden active:scale-[0.98] transition-transform hover:shadow-md cursor-pointer"
+                className="group relative flex flex-col glass-card border-slate-200 dark:border-white/5 overflow-hidden active:scale-[0.98] transition-transform hover:shadow-xl cursor-pointer"
               >
                 <div className="flex gap-4 p-4 items-start">
                   <div className="shrink-0">
